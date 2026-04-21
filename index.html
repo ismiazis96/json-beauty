@@ -3,63 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JSON Repair & Beautifier Pro</title>
+    
+    <title>JSON Fixer & Beautifier Otomatis | By Ismi Azis</title>
+    <meta name="description" content="Alat bantu untuk merapikan dan memperbaiki JSON rusak secara otomatis. Dikembangkan oleh Ismi Azis (QA Engineer).">
+    <meta name="keywords" content="JSON Beautifier, JSON Repair, Fix JSON, Ismi Azis, QA Automation, JSON Formatter Online">
+    <meta name="author" content="Ismi Azis">
+    <link rel="author" href="https://github.com/ismiazis96/">
+    
+    <meta property="og:title" content="JSON Fixer & Beautifier Otomatis - Ismi Azis">
+    <meta property="og:description" content="Perbaiki format JSON yang rusak dan rapikan struktur data dalam satu klik.">
+    <meta property="og:url" content="https://github.com/ismiazis96/">
+    <meta property="og:type" content="website">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "JSON Fixer & Beautifier",
+      "applicationCategory": "DeveloperApplication",
+      "author": {
+        "@type": "Person",
+        "name": "Ismi Azis",
+        "url": "https://www.linkedin.com/in/ismiazis96/",
+        "sameAs": [
+          "https://github.com/ismiazis96/",
+          "https://www.linkedin.com/in/ismiazis96/"
+        ]
+      }
+    }
+    </script>
+
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background: #eef2f7; display: flex; justify-content: center; }
-        .container { width: 95%; max-width: 1200px; background: white; padding: 25px; margin: 20px 0; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        h2 { margin-top: 0; color: #333; font-size: 1.5rem; }
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --bg-color: #f8f9fa;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            background-color: var(--bg-color); 
+            display: flex; 
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container { 
+            width: 95%; 
+            max-width: 1200px; 
+            margin: 20px auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            flex: 1;
+        }
+
+        h2 { margin-top: 0; color: #333; display: flex; align-items: center; gap: 10px; }
         
-        /* PERBAIKAN DI SINI: Membuat Textarea lebih panjang */
         textarea { 
             width: 100%; 
-            height: 65vh; /* 65% dari tinggi layar */
+            height: 60vh; /* Sangat lega untuk data besar */
             min-height: 400px; 
-            font-family: "Cascadia Code", "Source Code Pro", monospace; 
+            font-family: 'Cascadia Code', 'Consolas', monospace; 
             padding: 15px; 
-            border: 2px solid #dfe4ea; 
+            border: 2px solid #e0e0e0; 
             border-radius: 8px; 
             box-sizing: border-box; 
             resize: vertical; 
-            font-size: 13px;
+            font-size: 14px;
+            line-height: 1.5;
             outline: none;
             transition: border-color 0.3s;
         }
-        textarea:focus { border-color: #007bff; }
 
-        .controls { margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-        button { padding: 12px 20px; cursor: pointer; border: none; border-radius: 6px; font-weight: 600; font-size: 14px; transition: all 0.2s; }
-        
-        .btn-primary { background: #007bff; color: white; }
-        .btn-primary:hover { background: #0056b3; transform: translateY(-1px); }
-        
-        .btn-secondary { background: #6c757d; color: white; }
-        .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        .btn-success { background: #28a745; color: white; }
-        .btn-danger { background: #fff; color: #dc3545; border: 1px solid #dc3545; }
-        .btn-danger:hover { background: #dc3545; color: white; }
+        textarea:focus { border-color: var(--primary-color); }
 
-        .status { margin-top: 15px; padding: 10px; border-radius: 6px; font-size: 0.9em; display: none; }
-        .error { display: block; background: #fff5f5; color: #dc3545; border: 1px solid #feb2b2; }
-        .success { display: block; background: #f0fff4; color: #28a745; border: 1px solid #9ae6b4; }
+        .controls { 
+            margin-top: 20px; 
+            display: flex; 
+            gap: 12px; 
+            flex-wrap: wrap; 
+        }
+
+        button { 
+            padding: 12px 24px; 
+            cursor: pointer; 
+            border: none; 
+            border-radius: 6px; 
+            font-weight: 600; 
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-main { background: var(--primary-color); color: white; }
+        .btn-main:hover { background: #0056b3; transform: translateY(-1px); }
+        
+        .btn-undo { background: var(--secondary-color); color: white; }
+        .btn-undo:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-copy { background: var(--success-color); color: white; margin-left: auto; }
+        .btn-clear { background: transparent; color: var(--danger-color); border: 1px solid var(--danger-color); }
+
+        .status { 
+            margin-top: 15px; 
+            padding: 12px; 
+            border-radius: 6px; 
+            font-size: 0.95em; 
+            display: none; 
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: #333;
+            color: white;
+            margin-top: 40px;
+        }
+
+        footer a { color: #00d1b2; text-decoration: none; font-weight: bold; }
+        .social-links { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
+        .badge { height: 28px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>JSON Beautifier & Auto-Repair</h2>
-    <textarea id="jsonInput" placeholder="Paste JSON kamu di sini..."></textarea>
+    <h2>🛠️ JSON Fixer & Beautifier</h2>
+    <p style="color: #666; margin-bottom: 20px;">Rapikan format JSON dan perbaiki error kutip/koma secara otomatis.</p>
+    
+    <textarea id="jsonInput" placeholder="Tempel JSON mentah di sini..."></textarea>
     
     <div class="controls">
-        <button class="btn-primary" onclick="processJSON()">Format & Perbaiki Otomatis</button>
-        <button class="btn-secondary" id="undoBtn" onclick="undo()" disabled>Undo</button>
-        <button class="btn-secondary" id="redoBtn" onclick="redo()" disabled>Redo</button>
-        <div style="flex-grow: 1;"></div> <button class="btn-success" onclick="copyJSON()">Salin JSON</button>
-        <button class="btn-danger" onclick="clearAll()">Hapus Semua</button>
+        <button class="btn-main" onclick="processJSON()">🚀 Format & Perbaiki</button>
+        <button class="btn-undo" id="undoBtn" onclick="undo()" disabled>↩️ Undo</button>
+        <button class="btn-undo" id="redoBtn" onclick="redo()" disabled>↪️ Redo</button>
+        
+        <button class="btn-copy" onclick="copyJSON()">📋 Salin Hasil</button>
+        <button class="btn-clear" onclick="clearAll()">🗑️ Hapus</button>
     </div>
 
     <div id="status" class="status"></div>
 </div>
+
+<footer>
+    <p>Dikembangkan oleh <strong>Ismi Azis</strong></p>
+    <div class="social-links">
+        <a href="https://github.com/ismiazis96/" target="_blank">
+            <img class="badge" src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Ismi Azis">
+        </a>
+        <a href="https://www.linkedin.com/in/ismiazis96/" target="_blank">
+            <img class="badge" src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn Ismi Azis">
+        </a>
+    </div>
+    <p style="font-size: 0.8em; color: #bbb; margin-top: 10px;">&copy; 2026 Quality Assurance Tools</p>
+</footer>
 
 <script>
     const jsonInput = document.getElementById('jsonInput');
@@ -105,30 +208,34 @@
         if (!raw) return;
 
         try {
-            // Regex untuk memperbaiki kesalahan JSON ringan
+            // Logika Auto-Repair
             let fixed = raw
-                .replace(/'/g, '"') 
-                .replace(/,\s*([\]}])/g, '$1') 
-                .replace(/([{,]\s*)([a-zA-Z0-9_]+?)\s*:/g, '$1"$2":'); 
+                .replace(/'/g, '"') // ganti single quote
+                .replace(/,\s*([\]}])/g, '$1') // hapus trailing comma
+                .replace(/([{,]\s*)([a-zA-Z0-9_]+?)\s*:/g, '$1"$2":'); // tambah quote pada key
 
             const parsed = JSON.parse(fixed);
             jsonInput.value = JSON.stringify(parsed, null, 4);
             
-            statusDiv.className = "status success";
-            statusDiv.innerText = "✔ Berhasil dirapikan!";
+            showStatus("✔ JSON berhasil diperbaiki dan dirapikan!", "success");
             saveHistory();
         } catch (e) {
-            statusDiv.className = "status error";
-            statusDiv.innerText = "❌ Gagal: " + e.message;
+            showStatus("❌ Gagal memperbaiki: " + e.message, "error");
         }
+    }
+
+    function showStatus(msg, type) {
+        statusDiv.style.display = "block";
+        statusDiv.innerText = msg;
+        statusDiv.style.backgroundColor = type === "success" ? "#f0fff4" : "#fff5f5";
+        statusDiv.style.color = type === "success" ? "#28a745" : "#dc3545";
+        statusDiv.style.border = `1px solid ${type === "success" ? "#9ae6b4" : "#feb2b2"}`;
     }
 
     function copyJSON() {
         if (!jsonInput.value) return;
         navigator.clipboard.writeText(jsonInput.value);
-        statusDiv.className = "status success";
-        statusDiv.innerText = "📋 Tersalin ke clipboard!";
-        setTimeout(() => statusDiv.style.display = "none", 2000);
+        alert("JSON telah disalin ke clipboard!");
     }
 
     function clearAll() {
