@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Repair & Beautifier Pro</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background: #eef2f7; display: flex; justify-content: center; }
+        .container { width: 95%; max-width: 1200px; background: white; padding: 25px; margin: 20px 0; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h2 { margin-top: 0; color: #333; font-size: 1.5rem; }
+        
+        /* PERBAIKAN DI SINI: Membuat Textarea lebih panjang */
+        textarea { 
+            width: 100%; 
+            height: 65vh; /* 65% dari tinggi layar */
+            min-height: 400px; 
+            font-family: "Cascadia Code", "Source Code Pro", monospace; 
+            padding: 15px; 
+            border: 2px solid #dfe4ea; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            resize: vertical; 
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        textarea:focus { border-color: #007bff; }
+
+        .controls { margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        button { padding: 12px 20px; cursor: pointer; border: none; border-radius: 6px; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+        
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover { background: #0056b3; transform: translateY(-1px); }
+        
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #fff; color: #dc3545; border: 1px solid #dc3545; }
+        .btn-danger:hover { background: #dc3545; color: white; }
+
+        .status { margin-top: 15px; padding: 10px; border-radius: 6px; font-size: 0.9em; display: none; }
+        .error { display: block; background: #fff5f5; color: #dc3545; border: 1px solid #feb2b2; }
+        .success { display: block; background: #f0fff4; color: #28a745; border: 1px solid #9ae6b4; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>JSON Beautifier & Auto-Repair</h2>
+    <textarea id="jsonInput" placeholder="Paste JSON kamu di sini..."></textarea>
+    
+    <div class="controls">
+        <button class="btn-primary" onclick="processJSON()">Format & Perbaiki Otomatis</button>
+        <button class="btn-secondary" id="undoBtn" onclick="undo()" disabled>Undo</button>
+        <button class="btn-secondary" id="redoBtn" onclick="redo()" disabled>Redo</button>
+        <div style="flex-grow: 1;"></div> <button class="btn-success" onclick="copyJSON()">Salin JSON</button>
+        <button class="btn-danger" onclick="clearAll()">Hapus Semua</button>
+    </div>
+
+    <div id="status" class="status"></div>
+</div>
+
+<script>
+    const jsonInput = document.getElementById('jsonInput');
+    const statusDiv = document.getElementById('status');
+    const undoBtn = document.getElementById('undoBtn');
+    const redoBtn = document.getElementById('redoBtn');
+
+    let history = [""];
+    let historyStep = 0;
+
+    function saveHistory() {
+        const currentVal = jsonInput.value;
+        if (currentVal === history[historyStep]) return;
+        history = history.slice(0, historyStep + 1);
+        history.push(currentVal);
+        historyStep++;
+        updateButtons();
+    }
+
+    function updateButtons() {
+        undoBtn.disabled = historyStep <= 0;
+        redoBtn.disabled = historyStep >= history.length - 1;
+    }
+
+    function undo() {
+        if (historyStep > 0) {
+            historyStep--;
+            jsonInput.value = history[historyStep];
+            updateButtons();
+        }
+    }
+
+    function redo() {
+        if (historyStep < history.length - 1) {
+            historyStep++;
+            jsonInput.value = history[historyStep];
+            updateButtons();
+        }
+    }
+
+    function processJSON() {
+        let raw = jsonInput.value.trim();
+        if (!raw) return;
+
+        try {
+            // Regex untuk memperbaiki kesalahan JSON ringan
+            let fixed = raw
+                .replace(/'/g, '"') 
+                .replace(/,\s*([\]}])/g, '$1') 
+                .replace(/([{,]\s*)([a-zA-Z0-9_]+?)\s*:/g, '$1"$2":'); 
+
+            const parsed = JSON.parse(fixed);
+            jsonInput.value = JSON.stringify(parsed, null, 4);
+            
+            statusDiv.className = "status success";
+            statusDiv.innerText = "✔ Berhasil dirapikan!";
+            saveHistory();
+        } catch (e) {
+            statusDiv.className = "status error";
+            statusDiv.innerText = "❌ Gagal: " + e.message;
+        }
+    }
+
+    function copyJSON() {
+        if (!jsonInput.value) return;
+        navigator.clipboard.writeText(jsonInput.value);
+        statusDiv.className = "status success";
+        statusDiv.innerText = "📋 Tersalin ke clipboard!";
+        setTimeout(() => statusDiv.style.display = "none", 2000);
+    }
+
+    function clearAll() {
+        if(confirm("Hapus semua teks?")) {
+            jsonInput.value = "";
+            saveHistory();
+            statusDiv.style.display = "none";
+        }
+    }
+
+    jsonInput.addEventListener('input', () => {
+        clearTimeout(window.historyTimer);
+        window.historyTimer = setTimeout(saveHistory, 800);
+    });
+</script>
+
+</body>
+</html>
