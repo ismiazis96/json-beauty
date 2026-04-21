@@ -15,8 +15,10 @@
     <meta property="og:url" content="https://github.com/ismiazis96/">
     <meta property="og:type" content="website">
     <link rel="stylesheet" href="css/css2.css">
+    <!-- <link rel="stylesheet" href="style.css"> -->
     <script src="js/crypto-js.min.js"></script>
     <script src="js/lucide.min.js"></script>
+
 
     <style>
         :root {
@@ -40,6 +42,21 @@
             color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh;
         }
 
+        /* Navigasi Mobile Friendly */
+        nav { 
+            background: rgba(22, 27, 44, 0.95); 
+            backdrop-filter: blur(12px); 
+            border-bottom: 1px solid var(--border); 
+            padding: 0 10px; 
+            display: flex; 
+            align-items: center; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            overflow-x: auto; /* Memungkinkan scroll horizontal di HP */
+            scrollbar-width: none; /* Sembunyikan scrollbar Firefox */
+        }
+
         nav { 
             background: rgba(22, 27, 44, 0.9); backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border); padding: 0 2rem;
@@ -55,7 +72,7 @@
 
         .tab-btn {
             padding: 1.2rem 1rem; border: none; background: none; color: var(--text-muted);
-            cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px;
+            cursor: pointer; font-weight: 600; display: flex; flex-direction: column; /* Ikon di atas teks untuk mobile */ align-items: center; gap: 8px;
             border-bottom: 2px solid transparent; font-size: 0.9rem;
         }
 
@@ -123,17 +140,77 @@
             position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white;
             padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; display: none; z-index: 1000;
         }
+        /* Highlight colors */
+        .json-key { color: var(--j-key); }
+        .json-string { color: var(--j-string); }
+        .json-num { color: var(--j-num); }
         .sql-keyword { color: #f472b6; font-weight: bold; }
         .sql-string { color: #4ade80; }
+
+        /* Warna Diff */
+        .diff-added { 
+            background-color: rgba(34, 197, 94, 0.2); 
+            color: #4ade80; 
+            display: block; 
+            border-left: 4px solid #22c55e;
+            padding-left: 5px;
+        }
+        .diff-removed { 
+            background-color: rgba(239, 68, 68, 0.2); 
+            color: #f87171; 
+            display: block; 
+            border-left: 4px solid #ef4444;
+            padding-left: 5px;
+            text-decoration: line-through;
+        }
+        .diff-equal { 
+            display: block; 
+            padding-left: 9px; 
+            color: var(--text-muted); 
+        }
+
+        .label-sm {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            display: block;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
 
-<nav>
+<!-- <nav>
     <div class="logo">ISMIDEV PRO</div>
     <button class="tab-btn active" onclick="openTab('jsonPage', this)"><i data-lucide="braces"></i> JSON Tool</button>
     <button class="tab-btn" onclick="openTab('sqlPage', this)"><i data-lucide="database"></i> SQL Formatter</button>
+    <button class="tab-btn" onclick="openTab('textPage', this)"><i data-lucide="file-text"></i> Text Utils</button>
     <button class="tab-btn" onclick="openTab('hashPage', this)"><i data-lucide="fingerprint"></i> Hash Gen</button>
+</nav> -->
+
+<nav>
+    <div class="logo">ISMIDEV PRO</div>
+    <button class="tab-btn active" onclick="openTab('jsonPage', this)">
+        <i data-lucide="braces"></i><span>JSON</span>
+    </button>
+    <button class="tab-btn" onclick="openTab('sqlPage', this)">
+        <i data-lucide="database"></i><span>SQL</span>
+    </button>
+    <button class="tab-btn" onclick="openTab('textPage', this)">
+        <i data-lucide="file-text"></i><span>Text</span>
+    </button>
+    <button class="tab-btn" onclick="openTab('diffPage', this)">
+        <i data-lucide="columns"></i><span>Diff</span>
+    </button>
+    <button class="tab-btn" onclick="openTab('codecPage', this)">
+        <i data-lucide="binary"></i><span>Codec</span>
+    </button>
+    <button class="tab-btn" onclick="openTab('jwtPage', this)">
+        <i data-lucide="key-round"></i><span>JWT</span>
+    </button>
+    <button class="tab-btn" onclick="openTab('hashPage', this)">
+        <i data-lucide="fingerprint"></i><span>Hash</span>
+    </button>
 </nav>
 
 <div class="container">
@@ -166,6 +243,79 @@
             <div class="btn-group">
                 <button class="btn-primary" onclick="formatSQL()"><i data-lucide="layout-template"></i> Format SQL</button>
                 <button class="btn-sec" onclick="copyValue('sqlInput')">Copy Result</button>
+            </div>
+        </div>
+
+        <div id="textPage" class="page">
+            <h2>Text Utils & Counter</h2>
+            <div class="stats-bar">
+                <div class="stat-item">KATA: <span id="wordCount">0</span></div>
+                <div class="stat-item">KARAKTER: <span id="charCount">0</span></div>
+            </div>
+            <textarea id="textInput" placeholder="Paste teks di sini..." oninput="updateTextStats()"></textarea>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="changeCase('upper')">UPPERCASE</button>
+                <button class="btn-primary" onclick="changeCase('lower')">lowercase</button>
+                <button class="btn-primary" onclick="changeCase('title')">Title Case</button>
+                <button class="btn-sec" style="margin-left:auto" onclick="copyValue('textInput')">Copy</button>
+            </div>
+        </div>
+
+        <div id="diffPage" class="page">
+            <h2>Text Diff Checker</h2>
+            <div class="editor-grid">
+                <div>
+                    <span class="label-sm">Original (Old)</span>
+                    <textarea id="diffOld" style="height: 30vh;" placeholder="Tempel teks asli di sini..."></textarea>
+                </div>
+                <div>
+                    <span class="label-sm">Changed (New)</span>
+                    <textarea id="diffNew" style="height: 30vh;" placeholder="Tempel teks baru untuk dibanding..."></textarea>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="compareTexts()"><i data-lucide="search-code"></i> Compare Now</button>
+                <button class="btn-sec" onclick="clearDiff()">Clear</button>
+            </div>
+            <div id="diffResult" class="preview-box" style="height: auto; min-height: 200px; margin-top: 20px; display: none;"></div>
+        </div>
+
+        <div id="codecPage" class="page">
+            <h2>Base64 & URL Codec</h2>
+            <textarea id="codecInput" style="height: 150px;" placeholder="Input teks di sini..." oninput="runCodec()"></textarea>
+            
+            <div class="hash-grid" style="margin-top:20px;">
+                <div class="hash-card">
+                    <span class="hash-label">Base64 Encoded</span>
+                    <div id="b64Enc" class="hash-val">-</div>
+                    <button class="copy-small" onclick="copyText('b64Enc')"><i data-lucide="copy" size="14"></i></button>
+                </div>
+                <div class="hash-card">
+                    <span class="hash-label">Base64 Decoded</span>
+                    <div id="b64Dec" class="hash-val">-</div>
+                    <button class="copy-small" onclick="copyText('b64Dec')"><i data-lucide="copy" size="14"></i></button>
+                </div>
+                <div class="hash-card">
+                    <span class="hash-label">URL Encoded</span>
+                    <div id="urlEnc" class="hash-val">-</div>
+                    <button class="copy-small" onclick="copyText('urlEnc')"><i data-lucide="copy" size="14"></i></button>
+                </div>
+                <div class="hash-card">
+                    <span class="hash-label">URL Decoded</span>
+                    <div id="urlDec" class="hash-val">-</div>
+                    <button class="copy-small" onclick="copyText('urlDec')"><i data-lucide="copy" size="14"></i></button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="jwtPage" class="page">
+            <h2>JWT Debugger</h2>
+            <div class="editor-grid">
+                <textarea id="jwtInput" placeholder="Paste JWT Token di sini..." oninput="decodeJWT()"></textarea>
+                <div>
+                    <span class="label-sm">Decoded Payload</span>
+                    <div id="jwtPayload" class="preview-box">Header & Payload akan muncul di sini...</div>
+                </div>
             </div>
         </div>
 
@@ -222,129 +372,8 @@
 <script>
     lucide.createIcons();
 
-    function openTab(id, btn) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        btn.classList.add('active');
-    }
-
-    // --- Toast Notification ---
-    function showToast(msg) {
-        const t = document.getElementById('toast');
-        t.innerText = msg;
-        t.style.display = 'block';
-        setTimeout(() => { t.style.display = 'none'; }, 2000);
-    }
-
-    // --- JSON Logic ---
-    let history = [""];
-    let step = 0;
-
-    function runJsonMagic() {
-        const input = document.getElementById('jsonInput');
-        const preview = document.getElementById('jsonPreview');
-        try {
-            let raw = input.value;
-            let fixed = raw.replace(/'/g, '"').replace(/,\s*([\]}])/g, '$1').replace(/([{,]\s*)([a-zA-Z0-9_]+?)\s*:/g, '$1"$2":');
-            const obj = JSON.parse(fixed);
-            const formatted = JSON.stringify(obj, null, 4);
-            input.value = formatted;
-            preview.innerHTML = colorize(obj);
-            history.push(formatted);
-            step++;
-            document.getElementById('undoBtn').disabled = false;
-        } catch(e) { preview.innerHTML = `<span style="color:#ef4444">Error: ${e.message}</span>`; }
-    }
-
-    function colorize(json) {
-        if (typeof json != 'string') json = JSON.stringify(json, null, 4);
-        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g, function (match) {
-            let cls = 'json-num';
-            if (/^"/.test(match)) { cls = (/:$/.test(match)) ? 'json-key' : 'json-string'; }
-            else if (/true|false/.test(match)) { cls = 'json-bool'; }
-            else if (/null/.test(match)) { cls = 'json-null'; }
-            return `<span class="${cls}">${match}</span>`;
-        });
-    }
-
-    function undo() {
-        if(step > 0) {
-            step--;
-            document.getElementById('jsonInput').value = history[step];
-            document.getElementById('jsonPreview').innerHTML = "Click Fix to refresh highlight.";
-            if(step === 0) document.getElementById('undoBtn').disabled = true;
-        }
-    }
-
-    // --- Copy & Paste Logic ---
-    function copyGeneric(id, name) {
-        const val = document.getElementById(id).value;
-        if(!val) return;
-        navigator.clipboard.writeText(val);
-        showToast(`${name} tersalin!`);
-    }
-
-    function copyDirect(id) {
-        const val = document.getElementById(id).innerText;
-        if(!val || val === "-") return;
-        navigator.clipboard.writeText(val);
-        showToast(`Hash ${id.toUpperCase()} tersalin!`);
-    }
-
-    async function pasteToHash() {
-        try {
-            const text = await navigator.clipboard.readText();
-            document.getElementById('hashInput').value = text;
-            doHash();
-            showToast("Berhasil ditempel!");
-        } catch (err) {
-            alert("Gagal mengakses clipboard. Pastikan izin diberikan.");
-        }
-    }
-
-    // --- Hash Logic ---
-    function doHash() {
-        const v = document.getElementById('hashInput').value;
-        if(!v) {
-            document.querySelectorAll('.hash-val').forEach(el => el.innerText = "-");
-            return;
-        }
-        document.getElementById('md5').innerText = CryptoJS.MD5(v);
-        document.getElementById('sha1').innerText = CryptoJS.SHA1(v);
-        document.getElementById('sha256').innerText = CryptoJS.SHA256(v);
-        document.getElementById('sha512').innerText = CryptoJS.SHA512(v);
-    }
-
-    // --- SQL ---
-    function formatSQL() {
-        const input = document.getElementById('sqlInput');
-        const preview = document.getElementById('sqlPreview');
-        let sql = input.value.trim();
-        
-        // Simple SQL Formatter Logic
-        const keywords = ['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'GROUP BY', 'ORDER BY', 'LIMIT', 'INSERT INTO', 'UPDATE', 'DELETE', 'JOIN', 'LEFT JOIN', 'SET', 'VALUES'];
-        
-        let formatted = sql.replace(/\s+/g, ' '); // normalisasi spasi
-        keywords.forEach(key => {
-            const regex = new RegExp(`\\b${key}\\b`, 'gi');
-            formatted = formatted.replace(regex, `\n${key.toUpperCase()}`);
-        });
-
-        const result = formatted.trim();
-        input.value = result;
-
-        // Highlight Keywords
-        let highlighted = result.replace(/\b(SELECT|FROM|WHERE|AND|OR|GROUP BY|ORDER BY|LIMIT|INSERT|UPDATE|DELETE|JOIN|SET|VALUES)\b/g, '<span class="sql-keyword">$1</span>');
-        preview.innerHTML = highlighted;
-    }
-
-    // --- Utils ---
-    function copyValue(id) {
-        navigator.clipboard.writeText(document.getElementById(id).value);
-        showToast("Copied!");
-    }
 </script>
+<script src="js/script.js"></script>
 
 </body>
 </html>
