@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ismitech | QA & Dev Ultimate Tool</title>
+    <title>IsmiDev Pro | QA & Dev Ultimate Tool</title>
     
     <meta name="description" content="Alat bantu untuk merapikan dan memperbaiki JSON rusak secara otomatis. Dikembangkan oleh Ismi Azis (QA Engineer).">
-    <meta name="keywords" content="JSON Beautifier, JSON Repair, Fix JSON, Ismi Azis, QA Automation, JSON Formatter Online">
+    <meta name="keywords" content="JSON Beautifier, JSON Repair, Fix JSON, Ismi Azis, QA Automation, JSON Formatter Online, SQL Formatter">
     <meta name="author" content="Ismi Azis">
     <link rel="author" href="https://github.com/ismiazis96/">
     
@@ -14,12 +14,9 @@
     <meta property="og:description" content="Perbaiki format JSON yang rusak dan rapikan struktur data dalam satu klik.">
     <meta property="og:url" content="https://github.com/ismiazis96/">
     <meta property="og:type" content="website">
-    <!-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"> -->
     <link rel="stylesheet" href="css/css2.css">
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script> -->
     <script src="js/crypto-js.min.js"></script>
     <script src="js/lucide.min.js"></script>
-    <!-- <script src="https://unpkg.com/lucide@latest"></script> -->
 
     <style>
         :root {
@@ -32,11 +29,9 @@
             --border: #2d334a;
             --accent: #22d3ee;
             /* Syntax Colors */
-            --j-key: #f87171;    /* Redish */
-            --j-string: #4ade80; /* Green */
-            --j-num: #fbbf24;    /* Amber */
-            --j-bool: #60a5fa;   /* Blue */
-            --j-null: #94a3b8;   /* Slate */
+            --j-key: #f87171;    --j-string: #4ade80; 
+            --j-num: #fbbf24;    --j-bool: #60a5fa;   
+            --j-null: #94a3b8;
         }
 
         * { box-sizing: border-box; transition: all 0.2s ease; }
@@ -76,13 +71,15 @@
         .editor-wrapper { display: grid; grid-template-columns: 1fr; gap: 20px; }
         @media (min-width: 992px) { .editor-wrapper { grid-template-columns: 1fr 1fr; } }
 
+        .editor-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 992px) { .editor-grid { grid-template-columns: 1fr 1fr; } }
+
         textarea { 
             width: 100%; height: 50vh; background: #0d1117; color: #e6edf3;
             border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem;
             font-family: 'Fira Code', monospace; font-size: 0.85rem; outline: none;
         }
 
-        /* Highlighting Container */
         .preview-box {
             width: 100%; height: 50vh; background: #0d1117; border: 1px solid var(--border);
             border-radius: 12px; padding: 1.2rem; overflow: auto; white-space: pre;
@@ -104,20 +101,38 @@
         .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
         .btn-sec { background: #2d334a; color: white; }
 
-        .hash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
-        .hash-card { background: #0d1117; padding: 1rem; border-radius: 10px; border: 1px solid var(--border); }
-        .hash-label { font-size: 0.7rem; font-weight: 800; color: var(--accent); margin-bottom: 5px; display: block; }
-        .hash-val { font-family: 'Fira Code', monospace; font-size: 0.8rem; word-break: break-all; color: var(--text-main); }
+        /* Hash UI */
+        .hash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+        .hash-card { 
+            background: #0d1117; padding: 1.2rem; border-radius: 12px; 
+            border: 1px solid var(--border); position: relative;
+        }
+        .hash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .hash-label { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; }
+        .copy-icon-btn { 
+            background: none; border: none; color: var(--text-muted); cursor: pointer; 
+            padding: 4px; border-radius: 4px;
+        }
+        .copy-icon-btn:hover { color: var(--primary); background: rgba(99, 102, 241, 0.1); }
+        .hash-val { font-family: 'Fira Code', monospace; font-size: 0.8rem; word-break: break-all; color: var(--text-main); line-height: 1.4; min-height: 1.2rem;}
 
         footer { background: #070a13; padding: 2rem; text-align: center; border-top: 1px solid var(--border); }
         footer a { color: var(--primary); text-decoration: none; margin: 0 10px; font-size: 0.9rem; }
+        
+        .toast {
+            position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white;
+            padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; display: none; z-index: 1000;
+        }
+        .sql-keyword { color: #f472b6; font-weight: bold; }
+        .sql-string { color: #4ade80; }
     </style>
 </head>
 <body>
 
 <nav>
-    <div class="logo">ISMITECH PRO</div>
+    <div class="logo">ISMIDEV PRO</div>
     <button class="tab-btn active" onclick="openTab('jsonPage', this)"><i data-lucide="braces"></i> JSON Tool</button>
+    <button class="tab-btn" onclick="openTab('sqlPage', this)"><i data-lucide="database"></i> SQL Formatter</button>
     <button class="tab-btn" onclick="openTab('hashPage', this)"><i data-lucide="fingerprint"></i> Hash Gen</button>
 </nav>
 
@@ -138,22 +153,65 @@
             <div class="btn-group">
                 <button class="btn-primary" onclick="runJsonMagic()"><i data-lucide="wand"></i> Fix & Beautify</button>
                 <button class="btn-sec" onclick="undo()" id="undoBtn" disabled><i data-lucide="undo-2"></i> Undo</button>
-                <button class="btn-sec" style="margin-left:auto" onclick="copyResult()"><i data-lucide="copy"></i> Copy Result</button>
+                <button class="btn-sec" style="margin-left:auto" onclick="copyGeneric('jsonInput', 'JSON')"><i data-lucide="copy"></i> Copy Result</button>
+            </div>
+        </div>
+
+        <div id="sqlPage" class="page">
+            <h2>SQL Formatter</h2>
+            <div class="editor-grid">
+                <textarea id="sqlInput" placeholder="-- Paste messy SQL here (e.g. SELECT * FROM users WHERE id=1)"></textarea>
+                <div id="sqlPreview" class="preview-box">Formatted SQL...</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="formatSQL()"><i data-lucide="layout-template"></i> Format SQL</button>
+                <button class="btn-sec" onclick="copyValue('sqlInput')">Copy Result</button>
             </div>
         </div>
 
         <div id="hashPage" class="page">
             <h2 style="margin-top:0"><i data-lucide="shield" style="color:var(--primary)"></i> Hash Generator</h2>
-            <textarea id="hashInput" style="height: 120px; min-height: 120px;" placeholder="Type text to generate hashes..." oninput="doHash()"></textarea>
+            <div style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.8rem; color:var(--text-muted)">Plain Text</span>
+                <button class="btn-sec" style="padding: 4px 10px; font-size: 0.7rem;" onclick="pasteToHash()"><i data-lucide="clipboard"></i> Paste</button>
+            </div>
+            <textarea id="hashInput" style="height: 120px; min-height: 120px;" placeholder="Type or paste text here..." oninput="doHash()"></textarea>
+            
             <div class="hash-grid">
-                <div class="hash-card"><span class="hash-label">MD5</span><div id="md5" class="hash-val">-</div></div>
-                <div class="hash-card"><span class="hash-label">SHA1</span><div id="sha1" class="hash-val">-</div></div>
-                <div class="hash-card"><span class="hash-label">SHA256</span><div id="sha256" class="hash-val">-</div></div>
-                <div class="hash-card"><span class="hash-label">SHA512</span><div id="sha512" class="hash-val">-</div></div>
+                <div class="hash-card">
+                    <div class="hash-header">
+                        <span class="hash-label">MD5</span>
+                        <button class="copy-icon-btn" onclick="copyDirect('md5')"><i data-lucide="copy" size="14"></i></button>
+                    </div>
+                    <div id="md5" class="hash-val">-</div>
+                </div>
+                <div class="hash-card">
+                    <div class="hash-header">
+                        <span class="hash-label">SHA1</span>
+                        <button class="copy-icon-btn" onclick="copyDirect('sha1')"><i data-lucide="copy" size="14"></i></button>
+                    </div>
+                    <div id="sha1" class="hash-val">-</div>
+                </div>
+                <div class="hash-card">
+                    <div class="hash-header">
+                        <span class="hash-label">SHA256</span>
+                        <button class="copy-icon-btn" onclick="copyDirect('sha256')"><i data-lucide="copy" size="14"></i></button>
+                    </div>
+                    <div id="sha256" class="hash-val">-</div>
+                </div>
+                <div class="hash-card">
+                    <div class="hash-header">
+                        <span class="hash-label">SHA512</span>
+                        <button class="copy-icon-btn" onclick="copyDirect('sha512')"><i data-lucide="copy" size="14"></i></button>
+                    </div>
+                    <div id="sha512" class="hash-val">-</div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<div id="toast" class="toast">Tersalin ke clipboard!</div>
 
 <footer>
     <p>Built for Quality Assurance by <strong>Ismi Azis</strong></p>
@@ -171,7 +229,15 @@
         btn.classList.add('active');
     }
 
-    // --- JSON Logic with Highlighting ---
+    // --- Toast Notification ---
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 2000);
+    }
+
+    // --- JSON Logic ---
     let history = [""];
     let step = 0;
 
@@ -179,35 +245,25 @@
         const input = document.getElementById('jsonInput');
         const preview = document.getElementById('jsonPreview');
         try {
-            // Auto Repair Logic
             let raw = input.value;
             let fixed = raw.replace(/'/g, '"').replace(/,\s*([\]}])/g, '$1').replace(/([{,]\s*)([a-zA-Z0-9_]+?)\s*:/g, '$1"$2":');
-            
             const obj = JSON.parse(fixed);
             const formatted = JSON.stringify(obj, null, 4);
-            
             input.value = formatted;
             preview.innerHTML = colorize(obj);
-            
             history.push(formatted);
             step++;
             document.getElementById('undoBtn').disabled = false;
-        } catch(e) {
-            preview.innerHTML = `<span style="color:#ef4444">Error: ${e.message}</span>`;
-        }
+        } catch(e) { preview.innerHTML = `<span style="color:#ef4444">Error: ${e.message}</span>`; }
     }
 
     function colorize(json) {
         if (typeof json != 'string') json = JSON.stringify(json, null, 4);
         return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g, function (match) {
             let cls = 'json-num';
-            if (/^"/.test(match)) {
-                cls = (/:$/.test(match)) ? 'json-key' : 'json-string';
-            } else if (/true|false/.test(match)) {
-                cls = 'json-bool';
-            } else if (/null/.test(match)) {
-                cls = 'json-null';
-            }
+            if (/^"/.test(match)) { cls = (/:$/.test(match)) ? 'json-key' : 'json-string'; }
+            else if (/true|false/.test(match)) { cls = 'json-bool'; }
+            else if (/null/.test(match)) { cls = 'json-null'; }
             return `<span class="${cls}">${match}</span>`;
         });
     }
@@ -216,24 +272,77 @@
         if(step > 0) {
             step--;
             document.getElementById('jsonInput').value = history[step];
-            document.getElementById('jsonPreview').innerHTML = "Undo performed. Click Fix to refresh highlight.";
+            document.getElementById('jsonPreview').innerHTML = "Click Fix to refresh highlight.";
             if(step === 0) document.getElementById('undoBtn').disabled = true;
         }
     }
 
-    function copyResult() {
-        navigator.clipboard.writeText(document.getElementById('jsonInput').value);
-        alert("JSON Copied!");
+    // --- Copy & Paste Logic ---
+    function copyGeneric(id, name) {
+        const val = document.getElementById(id).value;
+        if(!val) return;
+        navigator.clipboard.writeText(val);
+        showToast(`${name} tersalin!`);
+    }
+
+    function copyDirect(id) {
+        const val = document.getElementById(id).innerText;
+        if(!val || val === "-") return;
+        navigator.clipboard.writeText(val);
+        showToast(`Hash ${id.toUpperCase()} tersalin!`);
+    }
+
+    async function pasteToHash() {
+        try {
+            const text = await navigator.clipboard.readText();
+            document.getElementById('hashInput').value = text;
+            doHash();
+            showToast("Berhasil ditempel!");
+        } catch (err) {
+            alert("Gagal mengakses clipboard. Pastikan izin diberikan.");
+        }
     }
 
     // --- Hash Logic ---
     function doHash() {
         const v = document.getElementById('hashInput').value;
-        if(!v) return;
+        if(!v) {
+            document.querySelectorAll('.hash-val').forEach(el => el.innerText = "-");
+            return;
+        }
         document.getElementById('md5').innerText = CryptoJS.MD5(v);
         document.getElementById('sha1').innerText = CryptoJS.SHA1(v);
         document.getElementById('sha256').innerText = CryptoJS.SHA256(v);
         document.getElementById('sha512').innerText = CryptoJS.SHA512(v);
+    }
+
+    // --- SQL ---
+    function formatSQL() {
+        const input = document.getElementById('sqlInput');
+        const preview = document.getElementById('sqlPreview');
+        let sql = input.value.trim();
+        
+        // Simple SQL Formatter Logic
+        const keywords = ['SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'GROUP BY', 'ORDER BY', 'LIMIT', 'INSERT INTO', 'UPDATE', 'DELETE', 'JOIN', 'LEFT JOIN', 'SET', 'VALUES'];
+        
+        let formatted = sql.replace(/\s+/g, ' '); // normalisasi spasi
+        keywords.forEach(key => {
+            const regex = new RegExp(`\\b${key}\\b`, 'gi');
+            formatted = formatted.replace(regex, `\n${key.toUpperCase()}`);
+        });
+
+        const result = formatted.trim();
+        input.value = result;
+
+        // Highlight Keywords
+        let highlighted = result.replace(/\b(SELECT|FROM|WHERE|AND|OR|GROUP BY|ORDER BY|LIMIT|INSERT|UPDATE|DELETE|JOIN|SET|VALUES)\b/g, '<span class="sql-keyword">$1</span>');
+        preview.innerHTML = highlighted;
+    }
+
+    // --- Utils ---
+    function copyValue(id) {
+        navigator.clipboard.writeText(document.getElementById(id).value);
+        showToast("Copied!");
     }
 </script>
 
