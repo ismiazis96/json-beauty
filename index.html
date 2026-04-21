@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ismitech | QA & Dev Ultimate Tool</title>
     
-    <title>JSON Fixer & Beautifier Otomatis | By Ismi Azis</title>
     <meta name="description" content="Alat bantu untuk merapikan dan memperbaiki JSON rusak secara otomatis. Dikembangkan oleh Ismi Azis (QA Engineer).">
     <meta name="keywords" content="JSON Beautifier, JSON Repair, Fix JSON, Ismi Azis, QA Automation, JSON Formatter Online">
     <meta name="author" content="Ismi Azis">
@@ -14,242 +14,227 @@
     <meta property="og:description" content="Perbaiki format JSON yang rusak dan rapikan struktur data dalam satu klik.">
     <meta property="og:url" content="https://github.com/ismiazis96/">
     <meta property="og:type" content="website">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "JSON Fixer & Beautifier",
-      "applicationCategory": "DeveloperApplication",
-      "author": {
-        "@type": "Person",
-        "name": "Ismi Azis",
-        "url": "https://www.linkedin.com/in/ismiazis96/",
-        "sameAs": [
-          "https://github.com/ismiazis96/",
-          "https://www.linkedin.com/in/ismiazis96/"
-        ]
-      }
-    }
-    </script>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"> -->
+    <link rel="stylesheet" href="css/css2.css">
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script> -->
+    <script src="js/crypto-js.min.js"></script>
+    <script src="js/lucide.min.js"></script>
+    <!-- <script src="https://unpkg.com/lucide@latest"></script> -->
 
     <style>
         :root {
-            --primary-color: #007bff;
-            --secondary-color: #6c757d;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --bg-color: #f8f9fa;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #0b0f1a;
+            --card-bg: #161b2c;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #2d334a;
+            --accent: #22d3ee;
+            /* Syntax Colors */
+            --j-key: #f87171;    /* Redish */
+            --j-string: #4ade80; /* Green */
+            --j-num: #fbbf24;    /* Amber */
+            --j-bool: #60a5fa;   /* Blue */
+            --j-null: #94a3b8;   /* Slate */
         }
 
+        * { box-sizing: border-box; transition: all 0.2s ease; }
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            margin: 0; 
-            background-color: var(--bg-color); 
-            display: flex; 
-            flex-direction: column;
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif; margin: 0; background-color: var(--bg); 
+            color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh;
         }
 
-        .container { 
-            width: 95%; 
-            max-width: 1200px; 
-            margin: 20px auto; 
-            background: white; 
-            padding: 30px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            flex: 1;
+        nav { 
+            background: rgba(22, 27, 44, 0.9); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border); padding: 0 2rem;
+            display: flex; align-items: center; position: sticky; top: 0; z-index: 100;
         }
 
-        h2 { margin-top: 0; color: #333; display: flex; align-items: center; gap: 10px; }
-        
+        .logo {
+            font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-right: 3rem;
+        }
+
+        .tab-btn {
+            padding: 1.2rem 1rem; border: none; background: none; color: var(--text-muted);
+            cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px;
+            border-bottom: 2px solid transparent; font-size: 0.9rem;
+        }
+
+        .tab-btn.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+        .container { width: 95%; max-width: 1200px; margin: 30px auto; flex: 1; }
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+
+        .page { display: none; animation: slideUp 0.3s ease-out; }
+        .page.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .editor-wrapper { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 992px) { .editor-wrapper { grid-template-columns: 1fr 1fr; } }
+
         textarea { 
-            width: 100%; 
-            height: 60vh; /* Sangat lega untuk data besar */
-            min-height: 400px; 
-            font-family: 'Cascadia Code', 'Consolas', monospace; 
-            padding: 15px; 
-            border: 2px solid #e0e0e0; 
-            border-radius: 8px; 
-            box-sizing: border-box; 
-            resize: vertical; 
-            font-size: 14px;
-            line-height: 1.5;
-            outline: none;
-            transition: border-color 0.3s;
+            width: 100%; height: 50vh; background: #0d1117; color: #e6edf3;
+            border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem;
+            font-family: 'Fira Code', monospace; font-size: 0.85rem; outline: none;
         }
 
-        textarea:focus { border-color: var(--primary-color); }
-
-        .controls { 
-            margin-top: 20px; 
-            display: flex; 
-            gap: 12px; 
-            flex-wrap: wrap; 
+        /* Highlighting Container */
+        .preview-box {
+            width: 100%; height: 50vh; background: #0d1117; border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.2rem; overflow: auto; white-space: pre;
+            font-family: 'Fira Code', monospace; font-size: 0.85rem;
         }
 
+        .json-key { color: var(--j-key); }
+        .json-string { color: var(--j-string); }
+        .json-num { color: var(--j-num); }
+        .json-bool { color: var(--j-bool); }
+        .json-null { color: var(--j-null); }
+
+        .btn-group { margin-top: 1.2rem; display: flex; gap: 10px; flex-wrap: wrap; }
         button { 
-            padding: 12px 24px; 
-            cursor: pointer; 
-            border: none; 
-            border-radius: 6px; 
-            font-weight: 600; 
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            padding: 0.7rem 1.2rem; border-radius: 8px; font-weight: 600; cursor: pointer; 
+            display: flex; align-items: center; gap: 6px; border: none; font-size: 0.85rem;
         }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
+        .btn-sec { background: #2d334a; color: white; }
 
-        .btn-main { background: var(--primary-color); color: white; }
-        .btn-main:hover { background: #0056b3; transform: translateY(-1px); }
-        
-        .btn-undo { background: var(--secondary-color); color: white; }
-        .btn-undo:disabled { opacity: 0.4; cursor: not-allowed; }
+        .hash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+        .hash-card { background: #0d1117; padding: 1rem; border-radius: 10px; border: 1px solid var(--border); }
+        .hash-label { font-size: 0.7rem; font-weight: 800; color: var(--accent); margin-bottom: 5px; display: block; }
+        .hash-val { font-family: 'Fira Code', monospace; font-size: 0.8rem; word-break: break-all; color: var(--text-main); }
 
-        .btn-copy { background: var(--success-color); color: white; margin-left: auto; }
-        .btn-clear { background: transparent; color: var(--danger-color); border: 1px solid var(--danger-color); }
-
-        .status { 
-            margin-top: 15px; 
-            padding: 12px; 
-            border-radius: 6px; 
-            font-size: 0.95em; 
-            display: none; 
-        }
-
-        footer {
-            text-align: center;
-            padding: 30px;
-            background: #333;
-            color: white;
-            margin-top: 40px;
-        }
-
-        footer a { color: #00d1b2; text-decoration: none; font-weight: bold; }
-        .social-links { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
-        .badge { height: 28px; }
+        footer { background: #070a13; padding: 2rem; text-align: center; border-top: 1px solid var(--border); }
+        footer a { color: var(--primary); text-decoration: none; margin: 0 10px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>🛠️ JSON Fixer & Beautifier</h2>
-    <p style="color: #666; margin-bottom: 20px;">Rapikan format JSON dan perbaiki error kutip/koma secara otomatis.</p>
-    
-    <textarea id="jsonInput" placeholder="Tempel JSON mentah di sini..."></textarea>
-    
-    <div class="controls">
-        <button class="btn-main" onclick="processJSON()">🚀 Format & Perbaiki</button>
-        <button class="btn-undo" id="undoBtn" onclick="undo()" disabled>↩️ Undo</button>
-        <button class="btn-undo" id="redoBtn" onclick="redo()" disabled>↪️ Redo</button>
-        
-        <button class="btn-copy" onclick="copyJSON()">📋 Salin Hasil</button>
-        <button class="btn-clear" onclick="clearAll()">🗑️ Hapus</button>
-    </div>
+<nav>
+    <div class="logo">ISMITECH PRO</div>
+    <button class="tab-btn active" onclick="openTab('jsonPage', this)"><i data-lucide="braces"></i> JSON Tool</button>
+    <button class="tab-btn" onclick="openTab('hashPage', this)"><i data-lucide="fingerprint"></i> Hash Gen</button>
+</nav>
 
-    <div id="status" class="status"></div>
+<div class="container">
+    <div class="card">
+        <div id="jsonPage" class="page active">
+            <h2 style="margin-top:0"><i data-lucide="zap" style="color:var(--accent)"></i> Smart JSON Beautifier</h2>
+            <div class="editor-wrapper">
+                <div>
+                    <span style="font-size:0.8rem; color:var(--text-muted)">Input (Raw/Messy)</span>
+                    <textarea id="jsonInput" placeholder="// Paste JSON here..."></textarea>
+                </div>
+                <div>
+                    <span style="font-size:0.8rem; color:var(--text-muted)">Preview (Highlighted)</span>
+                    <div id="jsonPreview" class="preview-box">Result will appear here...</div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="runJsonMagic()"><i data-lucide="wand"></i> Fix & Beautify</button>
+                <button class="btn-sec" onclick="undo()" id="undoBtn" disabled><i data-lucide="undo-2"></i> Undo</button>
+                <button class="btn-sec" style="margin-left:auto" onclick="copyResult()"><i data-lucide="copy"></i> Copy Result</button>
+            </div>
+        </div>
+
+        <div id="hashPage" class="page">
+            <h2 style="margin-top:0"><i data-lucide="shield" style="color:var(--primary)"></i> Hash Generator</h2>
+            <textarea id="hashInput" style="height: 120px; min-height: 120px;" placeholder="Type text to generate hashes..." oninput="doHash()"></textarea>
+            <div class="hash-grid">
+                <div class="hash-card"><span class="hash-label">MD5</span><div id="md5" class="hash-val">-</div></div>
+                <div class="hash-card"><span class="hash-label">SHA1</span><div id="sha1" class="hash-val">-</div></div>
+                <div class="hash-card"><span class="hash-label">SHA256</span><div id="sha256" class="hash-val">-</div></div>
+                <div class="hash-card"><span class="hash-label">SHA512</span><div id="sha512" class="hash-val">-</div></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <footer>
-    <p>Dikembangkan oleh <strong>Ismi Azis</strong></p>
-    <div class="social-links">
-        <a href="https://github.com/ismiazis96/" target="_blank">
-            <img class="badge" src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Ismi Azis">
-        </a>
-        <a href="https://www.linkedin.com/in/ismiazis96/" target="_blank">
-            <img class="badge" src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn Ismi Azis">
-        </a>
-    </div>
-    <p style="font-size: 0.8em; color: #bbb; margin-top: 10px;">&copy; 2026 Quality Assurance Tools</p>
+    <p>Built for Quality Assurance by <strong>Ismi Azis</strong></p>
+    <a href="https://github.com/ismiazis96/" target="_blank">GitHub</a> • 
+    <a href="https://www.linkedin.com/in/ismiazis96/" target="_blank">LinkedIn</a>
 </footer>
 
 <script>
-    const jsonInput = document.getElementById('jsonInput');
-    const statusDiv = document.getElementById('status');
-    const undoBtn = document.getElementById('undoBtn');
-    const redoBtn = document.getElementById('redoBtn');
+    lucide.createIcons();
 
-    let history = [""];
-    let historyStep = 0;
-
-    function saveHistory() {
-        const currentVal = jsonInput.value;
-        if (currentVal === history[historyStep]) return;
-        history = history.slice(0, historyStep + 1);
-        history.push(currentVal);
-        historyStep++;
-        updateButtons();
+    function openTab(id, btn) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
     }
 
-    function updateButtons() {
-        undoBtn.disabled = historyStep <= 0;
-        redoBtn.disabled = historyStep >= history.length - 1;
+    // --- JSON Logic with Highlighting ---
+    let history = [""];
+    let step = 0;
+
+    function runJsonMagic() {
+        const input = document.getElementById('jsonInput');
+        const preview = document.getElementById('jsonPreview');
+        try {
+            // Auto Repair Logic
+            let raw = input.value;
+            let fixed = raw.replace(/'/g, '"').replace(/,\s*([\]}])/g, '$1').replace(/([{,]\s*)([a-zA-Z0-9_]+?)\s*:/g, '$1"$2":');
+            
+            const obj = JSON.parse(fixed);
+            const formatted = JSON.stringify(obj, null, 4);
+            
+            input.value = formatted;
+            preview.innerHTML = colorize(obj);
+            
+            history.push(formatted);
+            step++;
+            document.getElementById('undoBtn').disabled = false;
+        } catch(e) {
+            preview.innerHTML = `<span style="color:#ef4444">Error: ${e.message}</span>`;
+        }
+    }
+
+    function colorize(json) {
+        if (typeof json != 'string') json = JSON.stringify(json, null, 4);
+        return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g, function (match) {
+            let cls = 'json-num';
+            if (/^"/.test(match)) {
+                cls = (/:$/.test(match)) ? 'json-key' : 'json-string';
+            } else if (/true|false/.test(match)) {
+                cls = 'json-bool';
+            } else if (/null/.test(match)) {
+                cls = 'json-null';
+            }
+            return `<span class="${cls}">${match}</span>`;
+        });
     }
 
     function undo() {
-        if (historyStep > 0) {
-            historyStep--;
-            jsonInput.value = history[historyStep];
-            updateButtons();
+        if(step > 0) {
+            step--;
+            document.getElementById('jsonInput').value = history[step];
+            document.getElementById('jsonPreview').innerHTML = "Undo performed. Click Fix to refresh highlight.";
+            if(step === 0) document.getElementById('undoBtn').disabled = true;
         }
     }
 
-    function redo() {
-        if (historyStep < history.length - 1) {
-            historyStep++;
-            jsonInput.value = history[historyStep];
-            updateButtons();
-        }
+    function copyResult() {
+        navigator.clipboard.writeText(document.getElementById('jsonInput').value);
+        alert("JSON Copied!");
     }
 
-    function processJSON() {
-        let raw = jsonInput.value.trim();
-        if (!raw) return;
-
-        try {
-            // Logika Auto-Repair
-            let fixed = raw
-                .replace(/'/g, '"') // ganti single quote
-                .replace(/,\s*([\]}])/g, '$1') // hapus trailing comma
-                .replace(/([{,]\s*)([a-zA-Z0-9_]+?)\s*:/g, '$1"$2":'); // tambah quote pada key
-
-            const parsed = JSON.parse(fixed);
-            jsonInput.value = JSON.stringify(parsed, null, 4);
-            
-            showStatus("✔ JSON berhasil diperbaiki dan dirapikan!", "success");
-            saveHistory();
-        } catch (e) {
-            showStatus("❌ Gagal memperbaiki: " + e.message, "error");
-        }
+    // --- Hash Logic ---
+    function doHash() {
+        const v = document.getElementById('hashInput').value;
+        if(!v) return;
+        document.getElementById('md5').innerText = CryptoJS.MD5(v);
+        document.getElementById('sha1').innerText = CryptoJS.SHA1(v);
+        document.getElementById('sha256').innerText = CryptoJS.SHA256(v);
+        document.getElementById('sha512').innerText = CryptoJS.SHA512(v);
     }
-
-    function showStatus(msg, type) {
-        statusDiv.style.display = "block";
-        statusDiv.innerText = msg;
-        statusDiv.style.backgroundColor = type === "success" ? "#f0fff4" : "#fff5f5";
-        statusDiv.style.color = type === "success" ? "#28a745" : "#dc3545";
-        statusDiv.style.border = `1px solid ${type === "success" ? "#9ae6b4" : "#feb2b2"}`;
-    }
-
-    function copyJSON() {
-        if (!jsonInput.value) return;
-        navigator.clipboard.writeText(jsonInput.value);
-        alert("JSON telah disalin ke clipboard!");
-    }
-
-    function clearAll() {
-        if(confirm("Hapus semua teks?")) {
-            jsonInput.value = "";
-            saveHistory();
-            statusDiv.style.display = "none";
-        }
-    }
-
-    jsonInput.addEventListener('input', () => {
-        clearTimeout(window.historyTimer);
-        window.historyTimer = setTimeout(saveHistory, 800);
-    });
 </script>
 
 </body>
