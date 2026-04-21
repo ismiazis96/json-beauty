@@ -176,6 +176,29 @@
             display: block;
             font-weight: 600;
         }
+
+        .gen-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .gen-row input, .gen-row select {
+            background: #0d1117;
+            color: white;
+            border: 1px solid var(--border);
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            flex: 1;
+        }
+        .btn-del {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            padding: 5px;
+        }
     </style>
 </head>
 <body>
@@ -192,6 +215,9 @@
     <div class="logo">ISMIDEV PRO</div>
     <button class="tab-btn active" onclick="openTab('jsonPage', this)">
         <i data-lucide="braces"></i><span>JSON</span>
+    </button>
+    <button class="tab-btn" onclick="openTab('genPage', this)">
+        <i data-lucide="cog"></i><span>Generator</span>
     </button>
     <button class="tab-btn" onclick="openTab('sqlPage', this)">
         <i data-lucide="database"></i><span>SQL</span>
@@ -231,6 +257,32 @@
                 <button class="btn-primary" onclick="runJsonMagic()"><i data-lucide="wand"></i> Fix & Beautify</button>
                 <button class="btn-sec" onclick="undo()" id="undoBtn" disabled><i data-lucide="undo-2"></i> Undo</button>
                 <button class="btn-sec" style="margin-left:auto" onclick="copyGeneric('jsonInput', 'JSON')"><i data-lucide="copy"></i> Copy Result</button>
+            </div>
+        </div>
+
+        <div id="genPage" class="page">
+            <h2>JSON Dummy Generator</h2>
+            <div class="editor-grid">
+                <div class="card" style="background: rgba(255,255,255,0.03); border: 1px dashed var(--border);">
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">Konfigurasi Data:</p>
+                    <div id="genConfig">
+                        </div>
+                    <button class="btn-sec" onclick="addGenRow()" style="width: 100%; margin-top: 10px;">
+                        <i data-lucide="plus"></i> Tambah Field
+                    </button>
+                    <div style="margin-top: 20px;">
+                        <label class="label-sm">Jumlah Record:</label>
+                        <input type="number" id="genCount" value="1" min="1" max="50" style="width: 60px; background: #0d1117; color: white; border: 1px solid var(--border); padding: 5px; border-radius: 4px;">
+                    </div>
+                </div>
+                <div id="genPreview" class="preview-box">Hasil JSON akan muncul di sini...</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="generateDummyJSON()"><i data-lucide="play"></i> Generate Data</button>
+                <!-- <button class="btn-sec" style="margin-left:auto" onclick="copyValue('genPreview', true)">Copy JSON</button> -->
+                <button class="btn-sec" onclick="copyGenResult()">
+                    <i data-lucide="copy"></i> Copy JSON
+                </button>
             </div>
         </div>
 
@@ -371,7 +423,7 @@
 
 <script>
     lucide.createIcons();
-
+    
 </script>
 <script src="js/script.js"></script>
 

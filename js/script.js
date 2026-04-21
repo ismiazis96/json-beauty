@@ -1,3 +1,4 @@
+
 function openTab(id, btn) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -243,3 +244,83 @@ function decodeJWT() {
         preview.innerHTML = `<span style="color:#ef4444">❌ Error: Gagal men-decode konten token. Pastikan token valid.</span><br><small style="color:#666">${e.message}</small>`;
     }
 }
+
+// Data Dummy Master
+const dummySource = {
+    name: ["Ismi Azis", "Budi Santoso", "Siti Aminah", "John Doe", "Jane Smith"],
+    email: ["admin@test.com", "user@ismidev.pro", "tester@qa.id", "dev@tech.io"],
+    city: ["Jakarta", "Bandung", "Surabaya", "Medan", "Yogyakarta"],
+    status: ["Active", "Inactive", "Pending", "Suspended"]
+};
+
+// Fungsi Tambah Baris Konfigurasi
+function addGenRow() {
+    const container = document.getElementById('genConfig');
+    const div = document.createElement('div');
+    div.className = 'gen-row';
+    div.innerHTML = `
+        <input type="text" placeholder="Key (misal: nama)" class="gen-key-input">
+        <select class="gen-type-input">
+            <option value="name">Nama</option>
+            <option value="email">Email</option>
+            <option value="number">Angka Acak</option>
+            <option value="city">Kota</option>
+            <option value="status">Status</option>
+            <option value="boolean">Boolean</option>
+        </select>
+        <button class="btn-del" onclick="this.parentElement.remove()"><i data-lucide="trash-2" size="16"></i></button>
+    `;
+    container.appendChild(div);
+    // PENTING: Render ulang icon Lucide setelah elemen baru ditambah
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+    // lucide.createIcons();
+}
+
+// Fungsi Generate JSON
+function generateDummyJSON() {
+    const rows = document.querySelectorAll('.gen-row');
+    const count = parseInt(document.getElementById('genCount').value);
+    const result = [];
+
+    for (let i = 0; i < count; i++) {
+        let obj = {};
+        rows.forEach(row => {
+            const key = row.querySelector('.gen-key-input').value || "key_" + Math.random().toString(36).substring(7);
+            const type = row.querySelector('.gen-type-input').value;
+            
+            let value;
+            if (type === 'number') value = Math.floor(Math.random() * 1000);
+            else if (type === 'boolean') value = Math.random() > 0.5;
+            else {
+                const source = dummySource[type];
+                value = source[Math.floor(Math.random() * source.length)];
+            }
+            obj[key] = value;
+        });
+        result.push(obj);
+    }
+
+    const finalOutput = count === 1 ? result[0] : result;
+    const preview = document.getElementById('genPreview');
+    preview.innerHTML = colorize(finalOutput);
+    // Simpan teks mentah agar bisa di-copy
+    preview.setAttribute('data-raw', JSON.stringify(finalOutput, null, 4));
+}
+
+function copyGenResult() {
+    const preview = document.getElementById('genPreview');
+    const rawData = preview.getAttribute('data-raw');
+    
+    if (!rawData || rawData === "Hasil JSON akan muncul di sini...") {
+        alert("Generate data dulu!");
+        return;
+    }
+    
+    navigator.clipboard.writeText(rawData);
+    showToast("JSON Dummy tersalin!");
+}
+// Inisialisasi 1 baris saat pertama buka
+addGenRow();
+
