@@ -261,15 +261,17 @@ function addGenRow() {
     const div = document.createElement('div');
     div.className = 'gen-row';
     div.innerHTML = `
-        <input type="text" placeholder="Key (misal: nama)" class="gen-key-input">
-        <select class="gen-type-input">
-            <option value="name">Nama</option>
-            <option value="email">Email</option>
-            <option value="number">Angka Acak</option>
-            <option value="city">Kota</option>
-            <option value="status">Status</option>
-            <option value="boolean">Boolean</option>
-        </select>
+        <div class="gen-inputs">
+            <input type="text" placeholder="Key (misal: nama)" class="gen-key-input">
+            <select class="gen-type-input">
+                <option value="name">Nama</option>
+                <option value="email">Email</option>
+                <option value="number">Angka Acak</option>
+                <option value="city">Kota</option>
+                <option value="status">Status</option>
+                <option value="boolean">Boolean</option>
+            </select>
+        </div>
         <button class="btn-del" onclick="this.parentElement.remove()"><i data-lucide="trash-2" size="16"></i></button>
     `;
     container.appendChild(div);
