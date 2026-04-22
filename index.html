@@ -202,6 +202,97 @@
             cursor: pointer;
             padding: 5px;
         }
+
+        /* Perbaikan UI Stats Bar */
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 12px 20px;
+            background: rgba(99, 102, 241, 0.1); /* Warna primary transparan */
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            width: fit-content; /* Agar tidak memanjang full jika tidak butuh */
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent); /* Warna biru muda menyala */
+            letter-spacing: 0.5px;
+        }
+
+        .stat-item span {
+            color: var(--text-main);
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+        }
+
+        /* Tambahan: Pastikan tombol copy di mobile tetap rapi */
+        @media (max-width: 600px) {
+            .stats-bar {
+                width: 100%;
+                justify-content: space-around;
+            }
+        }
+
+        .history-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .history-item:hover {
+            transform: translateX(5px);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-type {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .history-snippet {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 300px;
+        }
+
+        .history-time {
+            font-size: 0.7rem;
+            color: #666;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 8px;
+        }
     </style>
 </head>
 <body>
@@ -232,6 +323,9 @@
     <button class="tab-btn" onclick="openTab('hashPage', this)">
         <i data-lucide="fingerprint"></i><span>Hash</span>
     </button>
+    <!-- <button class="tab-btn" onclick="openTab('historyPage', this); renderHistory();">
+        <i data-lucide="history"></i><span>History</span>
+    </button> -->
 </nav>
 
 <div class="container">
@@ -252,7 +346,11 @@
                 <button class="btn-primary" onclick="runJsonMagic()"><i data-lucide="wand"></i> Fix & Beautify</button>
                 <button class="btn-sec" onclick="undo()" id="undoBtn" disabled><i data-lucide="undo-2"></i> Undo</button>
                 <button class="btn-sec" style="margin-left:auto" onclick="copyGeneric('jsonInput', 'JSON')"><i data-lucide="copy"></i> Copy Result</button>
+                <button class="btn-sec" onclick="exportJSON('jsonInput')">
+                    <i data-lucide="download"></i> Export .json
+                </button>
             </div>
+            
         </div>
 
         <div id="genPage" class="page">
@@ -271,14 +369,18 @@
                     </div>
                 </div>
                 <div id="genPreview" class="preview-box">Hasil JSON akan muncul di sini...</div>
+                    <button class="btn-sec" style="margin-left:auto" onclick="exportJSON('jsonInput')">
+                        <i data-lucide="download"></i> Export .json
+                    </button>
+                
             </div>
             <div class="btn-group">
                 <button class="btn-primary" onclick="generateDummyJSON()"><i data-lucide="play"></i> Generate Data</button>
-                <!-- <button class="btn-sec" style="margin-left:auto" onclick="copyValue('genPreview', true)">Copy JSON</button> -->
                 <button class="btn-sec" onclick="copyGenResult()">
                     <i data-lucide="copy"></i> Copy JSON
                 </button>
             </div>
+            
         </div>
 
         <div id="sqlPage" class="page">
@@ -403,7 +505,7 @@
                     </div>
                     <div id="sha512" class="hash-val">-</div>
                 </div>
-                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed var(--border);">
+                <div>
                     <h3><i data-lucide="lock" style="color:var(--j-key)"></i> Password Hash Generator (Bcrypt)</h3>
                     <div class="editor-grid" style="grid-template-columns: 1fr; gap: 10px;">
                         <div style="display: flex; gap: 10px;">
@@ -417,6 +519,17 @@
                             <div id="bcryptResult" class="hash-val">-</div>
                         </div>
                     </div>
+                </div>
+                <div id="historyPage" class="page">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>Recent Activities</h2>
+                        <button class="btn-sec" onclick="clearAllHistory()" style="color: #ef4444; border-color: #ef4444;">
+                            <i data-lucide="trash-2"></i> Clear All
+                        </button>
+                    </div>
+                    
+                    <div id="historyList" class="history-container">
+                        </div>
                 </div>
             </div>
         </div>

@@ -114,6 +114,8 @@ function formatSQL() {
     // Highlight Keywords
     let highlighted = result.replace(/\b(SELECT|FROM|WHERE|AND|OR|GROUP BY|ORDER BY|LIMIT|INSERT|UPDATE|DELETE|JOIN|SET|VALUES)\b/g, '<span class="sql-keyword">$1</span>');
     preview.innerHTML = highlighted;
+
+    saveToHistory('SQL Format', input.value);
 }
 
 // --- Utils ---
@@ -340,6 +342,107 @@ function generatePasswordHash() {
         showToast("Password Berhasil Di-hash!");
     } catch (e) {
         resultDiv.innerText = "Error: " + e.message;
+    }
+    saveToHistory('Bcrypt Hash', password);
+}
+
+// Fungsi Export untuk mengambil data dari element apa pun
+function exportJSON(elementId) {
+    const element = document.getElementById(elementId);
+    // Cek apakah data ada di value (textarea) atau data-raw (preview div)
+    const data = element.value || element.getAttribute('data-raw');
+
+    if (!data || data === "Result..." || data === "Hasil JSON akan muncul di sini...") {
+        showToast("Tidak ada data untuk di-export!");
+        return;
+    }
+
+    try {
+        const blob = new Blob([data], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ismidev-export-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("File JSON berhasil di-download!");
+    } catch (e) {
+        showToast("Gagal export file!");
+    }
+}
+
+// --- HISTORY LOGIC ---
+
+// 1. Fungsi untuk menyimpan riwayat (Panggil ini di setiap fitur utama)
+function saveToHistory(type, content) {
+    if (!content || content.length < 2) return;
+
+    let history = JSON.parse(localStorage.getItem('ismidev_history') || '[]');
+    
+    const newEntry = {
+        id: Date.now(),
+        type: type,
+        content: content, // Simpan konten asli
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    // Tambahkan ke paling atas dan batasi 20 item saja
+    history.unshift(newEntry);
+    history = history.slice(0, 20);
+    
+    localStorage.setItem('ismidev_history', JSON.stringify(history));
+}
+
+// 2. Fungsi untuk merender daftar riwayat ke layar
+function renderHistory() {
+    const container = document.getElementById('historyList');
+    const history = JSON.parse(localStorage.getItem('ismidev_history') || '[]');
+    
+    if (history.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted)">
+            <i data-lucide="ghost" size="48"></i>
+            <p>Belum ada riwayat aktivitas.</p>
+        </div>`;
+        lucide.createIcons();
+        return;
+    }
+
+    container.innerHTML = history.map(item => `
+        <div class="history-item">
+            <div class="history-info">
+                <span class="history-type">${item.type}</span>
+                <div class="history-snippet">${item.content.replace(/</g, "&lt;")}</div>
+                <span class="history-time">${item.time}</span>
+            </div>
+            <div class="history-actions">
+                <button class="btn-sec" style="padding:5px 10px;" onclick="copyFromHistory('${item.id}')">
+                    <i data-lucide="copy" size="16"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+    
+    lucide.createIcons();
+}
+
+// 3. Fungsi Copy dari riwayat
+function copyFromHistory(id) {
+    const history = JSON.parse(localStorage.getItem('ismidev_history') || '[]');
+    const item = history.find(h => h.id == id);
+    if (item) {
+        navigator.clipboard.writeText(item.content);
+        showToast("Riwayat tersalin!");
+    }
+}
+
+// 4. Fungsi Hapus Semua
+function clearAllHistory() {
+    if (confirm("Hapus semua riwayat?")) {
+        localStorage.removeItem('ismidev_history');
+        renderHistory();
+        showToast("Riwayat dibersihkan!");
     }
 }
 // Inisialisasi 1 baris saat pertama buka
