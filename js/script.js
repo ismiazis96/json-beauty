@@ -321,6 +321,27 @@ function copyGenResult() {
     navigator.clipboard.writeText(rawData);
     showToast("JSON Dummy tersalin!");
 }
+
+function generatePasswordHash() {
+    const password = document.getElementById('passInput').value;
+    const resultDiv = document.getElementById('bcryptResult');
+    
+    if (!password) {
+        alert("Masukkan password terlebih dahulu!");
+        return;
+    }
+
+    try {
+        // Menggunakan salt round 10 (standar industri)
+        const salt = dcodeIO.bcrypt.genSaltSync(10);
+        const hash = dcodeIO.bcrypt.hashSync(password, salt);
+        
+        resultDiv.innerText = hash;
+        showToast("Password Berhasil Di-hash!");
+    } catch (e) {
+        resultDiv.innerText = "Error: " + e.message;
+    }
+}
 // Inisialisasi 1 baris saat pertama buka
 addGenRow();
 

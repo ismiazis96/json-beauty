@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="css/css2.css">
     <!-- <link rel="stylesheet" href="style.css"> -->
     <script src="js/crypto-js.min.js"></script>
+    <script src="js/bcrypt.min.js"></script>
     <script src="js/lucide.min.js"></script>
 
 
@@ -204,14 +205,6 @@
     </style>
 </head>
 <body>
-
-<!-- <nav>
-    <div class="logo">ISMIDEV PRO</div>
-    <button class="tab-btn active" onclick="openTab('jsonPage', this)"><i data-lucide="braces"></i> JSON Tool</button>
-    <button class="tab-btn" onclick="openTab('sqlPage', this)"><i data-lucide="database"></i> SQL Formatter</button>
-    <button class="tab-btn" onclick="openTab('textPage', this)"><i data-lucide="file-text"></i> Text Utils</button>
-    <button class="tab-btn" onclick="openTab('hashPage', this)"><i data-lucide="fingerprint"></i> Hash Gen</button>
-</nav> -->
 
 <nav>
     <div class="logo">ISMIDEV PRO</div>
@@ -409,6 +402,21 @@
                         <button class="copy-icon-btn" onclick="copyDirect('sha512')"><i data-lucide="copy" size="14"></i></button>
                     </div>
                     <div id="sha512" class="hash-val">-</div>
+                </div>
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed var(--border);">
+                    <h3><i data-lucide="lock" style="color:var(--j-key)"></i> Password Hash Generator (Bcrypt)</h3>
+                    <div class="editor-grid" style="grid-template-columns: 1fr; gap: 10px;">
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="passInput" placeholder="Masukkan password polos..." style="flex: 1; background: #0d1117; color: white; border: 1px solid var(--border); padding: 12px; border-radius: 8px; outline: none;">
+                            <button class="btn-primary" onclick="generatePasswordHash()">Hash Password</button>
+                        </div>
+                        <div class="hash-card" style="margin-top: 10px;">
+                            <span class="hash-label">Bcrypt Hash (Cost: 10)</span>
+                            <div id="bcryptResult" class="hash-val" style="color: var(--j-string)">-</div>
+                            <button class="copy-icon-btn" onclick="copyDirect('bcryptResult')"><i data-lucide="copy" size="14"></i></button>
+                            <div id="bcryptResult" class="hash-val">-</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
