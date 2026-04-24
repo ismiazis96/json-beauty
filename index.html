@@ -53,6 +53,9 @@
     <button class="tab-btn" onclick="openTab('hashPage', this)">
         <i data-lucide="fingerprint"></i><span>Hash</span>
     </button>
+    <button class="tab-btn" onclick="openTab('loremPage', this)">
+        <i data-lucide="align-left"></i><span>Lorem</span>
+    </button>
     <!-- <button class="tab-btn" onclick="openTab('historyPage', this); renderHistory();">
         <i data-lucide="history"></i><span>History</span>
     </button> -->
@@ -163,22 +166,22 @@
                 <div class="hash-card">
                     <span class="hash-label">Base64 Encoded</span>
                     <div id="b64Enc" class="hash-val">-</div>
-                    <button class="copy-small" onclick="copyText('b64Enc')"><i data-lucide="copy" size="14"></i></button>
+                    <button class="copy-small" onclick="copyValue('b64Enc')"><i data-lucide="copy" size="14"></i></button>
                 </div>
                 <div class="hash-card">
                     <span class="hash-label">Base64 Decoded</span>
                     <div id="b64Dec" class="hash-val">-</div>
-                    <button class="copy-small" onclick="copyText('b64Dec')"><i data-lucide="copy" size="14"></i></button>
+                    <button class="copy-small" onclick="copyValue('b64Dec')"><i data-lucide="copy" size="14"></i></button>
                 </div>
                 <div class="hash-card">
                     <span class="hash-label">URL Encoded</span>
                     <div id="urlEnc" class="hash-val">-</div>
-                    <button class="copy-small" onclick="copyText('urlEnc')"><i data-lucide="copy" size="14"></i></button>
+                    <button class="copy-small" onclick="copyValue('urlEnc')"><i data-lucide="copy" size="14"></i></button>
                 </div>
                 <div class="hash-card">
                     <span class="hash-label">URL Decoded</span>
                     <div id="urlDec" class="hash-val">-</div>
-                    <button class="copy-small" onclick="copyText('urlDec')"><i data-lucide="copy" size="14"></i></button>
+                    <button class="copy-small" onclick="copyValue('urlDec')"><i data-lucide="copy" size="14"></i></button>
                 </div>
             </div>
         </div>
@@ -246,19 +249,46 @@
                         </div>
                     </div>
                 </div>
-                <div id="historyPage" class="page">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2>Recent Activities</h2>
-                        <button class="btn-sec" onclick="clearAllHistory()" style="color: #ef4444; border-color: #ef4444;">
-                            <i data-lucide="trash-2"></i> Clear All
-                        </button>
-                    </div>
-                    
-                    <div id="historyList" class="history-container">
-                        </div>
-                </div>
             </div>
         </div>
+
+        <div id="loremPage" class="page">
+            <h2>Lorem Ipsum Generator</h2>
+            <div class="editor-grid">
+                <div class="card" style="background: rgba(255,255,255,0.03); border: 1px dashed var(--border); height: fit-content;">
+                    <div style="margin-bottom: 15px;">
+                        <label class="label-sm">Jumlah:</label>
+                        <input type="number" id="loremCount" value="3" min="1" max="50" style="width: 100%; background: #0d1117; color: white; border: 1px solid var(--border); padding: 10px; border-radius: 8px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label class="label-sm">Tipe:</label>
+                        <select id="loremType" style="width: 100%; background: #0d1117; color: white; border: 1px solid var(--border); padding: 10px; border-radius: 8px;">
+                            <option value="paragraphs">Paragraf</option>
+                            <option value="sentences">Kalimat</option>
+                            <option value="words">Kata</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" style="width: 100%;" onclick="generateLorem()">
+                        <i data-lucide="play"></i> Generate Teks
+                    </button>
+                </div>
+        
+                <div id="loremPreview" class="preview-box">
+                    Hasil generator akan muncul di sini...
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-sec" onclick="clearForm('loremCount', 'loremPreview')">
+                    <i data-lucide="refresh-ccw"></i> Clear
+                </button>
+                
+                <button class="btn-sec" style="margin-left:auto" onclick="copyValue('loremPreview')">
+                    <i data-lucide="copy"></i> Copy Text
+                </button>
+            </div>
+        </div>
+
+        
     </div>
 </div>
 

@@ -334,3 +334,29 @@ footer a { color: var(--primary); text-decoration: none; margin: 0 10px; font-si
         margin-left: auto; /* Tombol copy tetap di kanan pada desktop */
     }
 }
+
+/* Khusus untuk halaman Lorem agar gridnya lebih proporsional */
+#loremPage .editor-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Default mobile tumpuk */
+    gap: 20px;
+}
+
+@media (min-width: 992px) {
+    #loremPage .editor-grid {
+        grid-template-columns: 300px 1fr; /* Kiri kecil (300px), Kanan sisa layar */
+    }
+}
+
+/* Batasi tinggi preview agar tidak terlalu panjang ke bawah */
+#loremPreview {
+    height: 50vh; 
+    min-height: 300px;
+    max-height: 600px;
+    overflow-y: auto; /* Biar bisa di-scroll kalau teksnya banyak */
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    line-height: 1.6;
+}

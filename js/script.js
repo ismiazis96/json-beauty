@@ -119,10 +119,69 @@ function formatSQL() {
 }
 
 // --- Utils ---
+
+// function copyValue(id) {
+//     navigator.clipboard.writeText(document.getElementById(id).value);
+//     showToast("Copied!");
+// }
+
+// --- UNIVERSAL UTILS ---
+
+// Fungsi Copy yang bisa handle Textarea maupun DIV
 function copyValue(id) {
-    navigator.clipboard.writeText(document.getElementById(id).value);
-    showToast("Copied!");
+    const el = document.getElementById(id);
+    let textToCopy = "";
+
+    if (!el) return;
+
+    // Cek apakah element itu textarea/input atau div biasa
+    if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+        textToCopy = el.value;
+    } else {
+        // Jika div (seperti preview box), ambil innerText
+        // Atau ambil data-raw jika ada (untuk JSON/Lorem yang ada format HTML-nya)
+        textToCopy = el.getAttribute('data-raw') || el.innerText;
+    }
+
+    if (!textToCopy || textToCopy === "Result..." || textToCopy.includes("akan muncul di sini")) {
+        showToast("Tidak ada teks untuk disalin!");
+        return;
+    }
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast("Tersalin ke clipboard!");
+    }).catch(err => {
+        console.error('Gagal menyalin: ', err);
+    });
 }
+
+// Fungsi Clear Form Universal
+function clearForm(inputId, previewId) {
+    if (confirm("Bersihkan semua input dan hasil?")) {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+
+        if (input) input.value = "";
+        if (preview) {
+            if (preview.tagName === 'TEXTAREA') {
+                preview.value = "";
+            } else {
+                preview.innerHTML = "Hasil akan muncul di sini...";
+                preview.removeAttribute('data-raw');
+            }
+        }
+        
+        // Reset statistik jika di halaman Text Utils
+        if (inputId === 'textInput') {
+            document.getElementById('wordCount').innerText = "0";
+            document.getElementById('charCount').innerText = "0";
+        }
+        
+        showToast("Form dibersihkan!");
+    }
+}
+
+
 
 // --- TEXT UTILS LOGIC ---
 function updateTextStats() {
@@ -446,6 +505,53 @@ function clearAllHistory() {
         renderHistory();
         showToast("Riwayat dibersihkan!");
     }
+}
+
+// --- LOREM IPSUM LOGIC ---
+function generateLorem() {
+    const count = parseInt(document.getElementById('loremCount').value) || 1;
+    const type = document.getElementById('loremType').value;
+    const preview = document.getElementById('loremPreview');
+
+    const words = ["lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit", "sed", "do", "eiusmod", "tempor", "incididunt", "ut", "labore", "et", "dolore", "magna", "aliqua", "enim", "ad", "minim", "veniam", "quis", "nostrud", "exercitation", "ullamco", "laboris", "nisi", "ut", "aliquip", "ex", "ea", "commodo", "consequat"];
+
+    const getSentence = () => {
+        let sentence = [];
+        const len = Math.floor(Math.random() * 10) + 5;
+        for (let i = 0; i < len; i++) {
+            sentence.push(words[Math.floor(Math.random() * words.length)]);
+        }
+        let s = sentence.join(" ");
+        return s.charAt(0).toUpperCase() + s.slice(1) + ".";
+    };
+
+    let result = [];
+
+    if (type === 'words') {
+        for (let i = 0; i < count; i++) {
+            result.push(words[Math.floor(Math.random() * words.length)]);
+        }
+        preview.innerText = result.join(" ");
+    } else if (type === 'sentences') {
+        for (let i = 0; i < count; i++) {
+            result.push(getSentence());
+        }
+        preview.innerText = result.join(" ");
+    } else {
+        // Paragraf
+        for (let i = 0; i < count; i++) {
+            let p = [];
+            const pLen = Math.floor(Math.random() * 3) + 3;
+            for (let j = 0; j < pLen; j++) {
+                p.push(getSentence());
+            }
+            result.push(p.join(" "));
+        }
+        preview.innerHTML = result.map(p => `<p style="margin-bottom:15px">${p}</p>`).join("");
+    }
+    
+    // Simpan ke history jika mau
+    saveToHistory('Lorem Generator', `Generated ${count} ${type}`);
 }
 // Inisialisasi 1 baris saat pertama buka
 addGenRow();
