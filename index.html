@@ -64,50 +64,342 @@
 <div class="container">
     <div class="card">
         <div id="jsonPage" class="page active">
-            <h2 style="margin-top:0"><i data-lucide="zap" style="color:var(--accent)"></i> Smart JSON Beautifier</h2>
+            <h2 style="margin-top:0"><i data-lucide="zap" style="color:var(--accent)"></i> Smart JSON Beautifier & Contract Validator</h2>
+            
+            <!-- JSONPath Filter Bar -->
+            <div class="jsonpath-container">
+                <div class="jsonpath-input-group">
+                    <span class="jsonpath-label"><i data-lucide="filter" size="14"></i> JSONPath:</span>
+                    <input type="text" id="jsonPathQuery" class="jsonpath-input" placeholder="Contoh: $.data.items[*].id atau $.users[0].name atau store.book..author" onkeydown="if(event.key==='Enter') applyJsonPath()">
+                    <button class="btn-sm btn-primary-sm" onclick="applyJsonPath()" title="Jalankan filter JSONPath"><i data-lucide="search" size="14"></i> Filter</button>
+                    <button class="btn-sm btn-sec-sm" onclick="resetJsonPath()" title="Reset ke JSON awal"><i data-lucide="rotate-ccw" size="14"></i> Reset</button>
+                </div>
+                <span id="jsonPathBadge" class="badge badge-info" style="display:none">0 match</span>
+            </div>
+
             <div class="editor-wrapper">
                 <div>
-                    <span style="font-size:0.8rem; color:var(--text-muted)">Input (Raw/Messy)</span>
-                    <textarea id="jsonInput" placeholder="// Paste JSON here..."></textarea>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                        <span style="font-size:0.8rem; color:var(--text-muted)">Input (Raw/Messy/Escaped)</span>
+                        <span style="font-size:0.75rem; color:var(--text-muted)"><kbd style="background:#222; padding:2px 5px; border-radius:3px;">Ctrl+Enter</kbd> to Fix</span>
+                    </div>
+                    <textarea id="jsonInput" placeholder="// Paste JSON here...&#10;{&#10;    'id': 1,&#10;    name: 'Sample',&#10;    items: [1, 2, 3,]&#10;}"></textarea>
                 </div>
                 <div>
-                    <span style="font-size:0.8rem; color:var(--text-muted)">Preview (Highlighted)</span>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                        <span style="font-size:0.8rem; color:var(--text-muted)">Preview (Syntax Highlighted)</span>
+                        <span id="jsonSizeInfo" style="font-size:0.75rem; color:var(--accent)"></span>
+                    </div>
                     <div id="jsonPreview" class="preview-box">Result will appear here...</div>
                 </div>
             </div>
+            
             <div class="btn-group">
                 <button class="btn-primary" onclick="runJsonMagic()"><i data-lucide="wand"></i> Fix & Beautify</button>
+                <button class="btn-sec" onclick="minifyJson()"><i data-lucide="minimize-2"></i> Minify</button>
+                <button class="btn-sec" onclick="unescapeJsonInput()" title="Bersihkan escape quotes dari log/terminal"><i data-lucide="file-code"></i> Unescape JSON</button>
+                <button class="btn-sec" onclick="escapeJsonInput()" title="Konversi ke escaped string untuk string literal/cURL"><i data-lucide="quote"></i> Escape JSON</button>
                 <button class="btn-sec" onclick="undo()" id="undoBtn" disabled><i data-lucide="undo-2"></i> Undo</button>
                 <button class="btn-sec" onclick="copyGeneric('jsonInput', 'JSON')"><i data-lucide="copy"></i> Copy Result</button>
-                <button class="btn-sec" onclick="exportJSON('jsonInput')">
-                    <i data-lucide="download"></i> Export .json
+                <button class="btn-sec" onclick="exportJSON('jsonInput')"><i data-lucide="download"></i> Export .json</button>
+                <button class="btn-sec" style="margin-left:auto" onclick="clearJsonWorkspace()"><i data-lucide="trash-2"></i> Clear</button>
+            </div>
+
+            <!-- JSON Schema Contract Validator Drawer -->
+            <div class="collapsible-card" id="schemaValidatorCard">
+                <button class="collapsible-trigger" type="button" onclick="toggleSchemaValidator()">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <i data-lucide="shield-check" style="color:var(--accent)"></i>
+                        <span>JSON Schema Contract Validator (Draft 7 / 2020-12)</span>
+                        <span id="schemaStatusBadge" class="badge badge-neutral">Not Validated</span>
+                    </div>
+                    <i data-lucide="chevron-down" id="schemaToggleIcon"></i>
                 </button>
+                <div class="collapsible-body" id="schemaValidatorBody" style="display:none;">
+                    <div class="editor-grid">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <span class="label-sm">JSON Schema Contract</span>
+                                <select id="schemaPresets" onchange="loadSchemaPreset(this.value)" class="select-sm">
+                                    <option value="">-- Load Template Skema --</option>
+                                    <option value="user">User Profile Schema</option>
+                                    <option value="api">API Response Envelope</option>
+                                    <option value="product">E-Commerce Product Schema</option>
+                                </select>
+                            </div>
+                            <textarea id="schemaInput" style="height: 28vh;" placeholder="// Paste JSON Schema contract here...&#10;{&#10;  &quot;type&quot;: &quot;object&quot;,&#10;  &quot;required&quot;: [&quot;id&quot;, &quot;name&quot;],&#10;  &quot;properties&quot;: {&#10;    &quot;id&quot;: { &quot;type&quot;: &quot;integer&quot; },&#10;    &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; }&#10;  }&#10;}"></textarea>
+                        </div>
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <span class="label-sm">Hasil Diagnostik Validasi</span>
+                                <span id="schemaSummaryText" style="font-size:0.75rem; color:var(--text-muted)"></span>
+                            </div>
+                            <div id="schemaResultBox" class="preview-box" style="height: 28vh; overflow-y:auto;">
+                                <div style="color:var(--text-muted); font-size:0.85rem; padding:10px;">
+                                    Tempel skema kontrak di sebelah kiri atau pilih template, lalu klik <strong>"Validate Contract"</strong> untuk menguji kesesuaian payload JSON Anda.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn-group" style="margin-top:12px;">
+                        <button class="btn-primary" onclick="validateCurrentJsonSchema()"><i data-lucide="check-circle-2"></i> Validate Contract</button>
+                        <button class="btn-sec" onclick="clearSchemaForm()"><i data-lucide="refresh-cw"></i> Clear Schema</button>
+                    </div>
+                </div>
             </div>
             
         </div>
 
         <div id="genPage" class="page">
-            <h2>JSON Dummy Generator</h2>
+            <h2 style="margin-top:0"><i data-lucide="cog" style="color:var(--accent)"></i> QA Data & Boundary Generator</h2>
+
+            <!-- Quick Indonesian Identity Generator Bar -->
+            <div class="qa-quick-section">
+                <div class="qa-quick-title">
+                    <i data-lucide="fingerprint"></i> Quick Indonesian Identity Mock (1-Click Generator)
+                </div>
+                <div class="qa-quick-grid">
+                    <div class="qa-quick-card">
+                        <div class="qa-card-header">
+                            <span class="qa-card-label">NIK Indonesia (16-Digit)</span>
+                            <button class="copy-icon-btn" onclick="copyQuickMock('nik')" title="Copy NIK"><i data-lucide="copy" size="14"></i></button>
+                        </div>
+                        <div id="quickNikVal" class="qa-card-value">-</div>
+                        <div id="quickNikMeta" class="qa-card-meta">Provinsi, Tgl Lahir, Jenis Kelamin</div>
+                        <div class="qa-card-actions">
+                            <button class="btn-sm btn-primary-sm" onclick="generateQuickNik()"><i data-lucide="refresh-cw" size="12"></i> Generate</button>
+                            <button class="btn-sm btn-sec-sm" onclick="insertMockToJson('nik')"><i data-lucide="corner-down-left" size="12"></i> To Editor</button>
+                        </div>
+                    </div>
+
+                    <div class="qa-quick-card">
+                        <div class="qa-card-header">
+                            <span class="qa-card-label">NPWP Indonesia (15/16 Digit)</span>
+                            <button class="copy-icon-btn" onclick="copyQuickMock('npwp')" title="Copy NPWP"><i data-lucide="copy" size="14"></i></button>
+                        </div>
+                        <div id="quickNpwpVal" class="qa-card-value">-</div>
+                        <div id="quickNpwpMeta" class="qa-card-meta">Format Terstandarisasi</div>
+                        <div class="qa-card-actions">
+                            <button class="btn-sm btn-primary-sm" onclick="generateQuickNpwp()"><i data-lucide="refresh-cw" size="12"></i> Generate</button>
+                            <button class="btn-sm btn-sec-sm" onclick="insertMockToJson('npwp')"><i data-lucide="corner-down-left" size="12"></i> To Editor</button>
+                        </div>
+                    </div>
+
+                    <div class="qa-quick-card">
+                        <div class="qa-card-header">
+                            <span class="qa-card-label">Nomor HP Operator (08xx)</span>
+                            <button class="copy-icon-btn" onclick="copyQuickMock('phone')" title="Copy No HP"><i data-lucide="copy" size="14"></i></button>
+                        </div>
+                        <div id="quickPhoneVal" class="qa-card-value">-</div>
+                        <div id="quickPhoneMeta" class="qa-card-meta">Telkomsel / Indosat / XL / Tri</div>
+                        <div class="qa-card-actions">
+                            <button class="btn-sm btn-primary-sm" onclick="generateQuickPhone()"><i data-lucide="refresh-cw" size="12"></i> Generate</button>
+                            <button class="btn-sm btn-sec-sm" onclick="insertMockToJson('phone')"><i data-lucide="corner-down-left" size="12"></i> To Editor</button>
+                        </div>
+                    </div>
+
+                    <div class="qa-quick-card">
+                        <div class="qa-card-header">
+                            <span class="qa-card-label">KTP Identity Mock (Full)</span>
+                            <button class="copy-icon-btn" onclick="copyQuickMock('identity')" title="Copy Profil"><i data-lucide="copy" size="14"></i></button>
+                        </div>
+                        <div id="quickIdentityVal" class="qa-card-value" style="font-size:0.8rem;">-</div>
+                        <div id="quickIdentityMeta" class="qa-card-meta">Profil KTP Lengkap</div>
+                        <div class="qa-card-actions">
+                            <button class="btn-sm btn-primary-sm" onclick="generateQuickIdentity()"><i data-lucide="refresh-cw" size="12"></i> Generate</button>
+                            <button class="btn-sm btn-sec-sm" onclick="insertMockToJson('identity')"><i data-lucide="corner-down-left" size="12"></i> To Editor</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Schema Dummy Generator -->
             <div class="editor-grid">
                 <div class="card" style="background: rgba(255,255,255,0.03); border: 1px dashed var(--border);">
-                    <p style="font-size: 0.8rem; color: var(--text-muted);">Konfigurasi Data:</p>
-                    <div id="genConfig">
-                        </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <span class="label-sm" style="margin:0;">Konfigurasi Field Data:</span>
+                        <button class="btn-sm btn-sec-sm" onclick="loadDefaultGenFields()"><i data-lucide="sparkles" size="12"></i> Template QA</button>
+                    </div>
+                    <div id="genConfig"></div>
                     <button class="btn-sec" onclick="addGenRow()" style="width: 100%; margin-top: 10px;">
                         <i data-lucide="plus"></i> Tambah Field
                     </button>
-                    <div style="margin-top: 20px;">
-                        <label class="label-sm">Jumlah Record:</label>
-                        <input type="number" id="genCount" value="1" min="1" max="50" style="width: 60px; background: #0d1117; color: white; border: 1px solid var(--border); padding: 5px; border-radius: 4px;">
+                    <div style="margin-top: 18px; display:flex; align-items:center; gap:12px;">
+                        <label class="label-sm" style="margin:0;">Jumlah Record:</label>
+                        <input type="number" id="genCount" value="1" min="1" max="100" style="width: 70px; background: #0d1117; color: white; border: 1px solid var(--border); padding: 6px 10px; border-radius: 6px;">
                     </div>
                 </div>
-                <div id="genPreview" class="preview-box">Hasil JSON akan muncul di sini...</div>                
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                        <span class="label-sm">Hasil JSON Dummy</span>
+                    </div>
+                    <div id="genPreview" class="preview-box">Hasil JSON akan muncul di sini...</div>
+                </div>                
             </div>
+            
             <div class="btn-group">
                 <button class="btn-primary" onclick="generateDummyJSON()"><i data-lucide="play"></i> Generate Data</button>
-                <button class="btn-sec" onclick="copyGenResult()">
-                    <i data-lucide="copy"></i> Copy JSON
-                </button>
+                <button class="btn-sec" onclick="copyGenResult()"><i data-lucide="copy"></i> Copy JSON</button>
+                <button class="btn-sec" onclick="sendGenToJsonEditor()"><i data-lucide="send"></i> Kirim ke JSON Editor</button>
+            </div>
+
+            <!-- Boundary & Security Injection Presets -->
+            <div class="collapsible-card" style="margin-top:24px;">
+                <div class="collapsible-trigger" style="cursor:default; background:rgba(22, 27, 44, 0.75);">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="shield-alert" style="color:#fbbf24"></i>
+                        <span>QA Boundary & Security Injection Presets (FR-2.2)</span>
+                    </div>
+                </div>
+                <div class="collapsible-body" style="background:rgba(13, 17, 23, 0.4);">
+                    <div class="qa-preset-tabs">
+                        <button class="qa-preset-tab active" onclick="switchPresetTab('boundary', this)">📏 Boundary Length</button>
+                        <button class="qa-preset-tab" onclick="switchPresetTab('unicode', this)">🔣 Unicode & Extreme</button>
+                        <button class="qa-preset-tab" onclick="switchPresetTab('security', this)">🛡️ Security Payloads (XSS & SQLi)</button>
+                    </div>
+
+                    <!-- Tab 1: Boundary Length -->
+                    <div id="presetTab-boundary" class="preset-content active">
+                        <div class="preset-card-list">
+                            <div class="preset-item">
+                                <div class="preset-info">
+                                    <div class="preset-title"><span>255 Karakter Alfanumerik</span> <span class="badge badge-neutral">VARCHAR(255)</span></div>
+                                    <div class="preset-snippet" id="bound255">A1b2C3d4E5f6G7h8I9j0...</div>
+                                </div>
+                                <div class="preset-actions">
+                                    <button class="btn-sm btn-sec-sm" onclick="copyPresetVal('bound255')"><i data-lucide="copy" size="14"></i> Copy</button>
+                                </div>
+                            </div>
+                            <div class="preset-item">
+                                <div class="preset-info">
+                                    <div class="preset-title"><span>1.000 Karakter String Tanpa Spasi</span> <span class="badge badge-neutral">TEXT(1000)</span></div>
+                                    <div class="preset-snippet" id="bound1000">QA_BOUNDARY_TEST_STRING_REPEAT_1000_CHARS_...</div>
+                                </div>
+                                <div class="preset-actions">
+                                    <button class="btn-sm btn-sec-sm" onclick="copyPresetVal('bound1000')"><i data-lucide="copy" size="14"></i> Copy</button>
+                                </div>
+                            </div>
+                            <div class="preset-item">
+                                <div class="preset-info">
+                                    <div class="preset-title"><span>5.000 Karakter Payload Ekstrem</span> <span class="badge badge-neutral">LONG_PAYLOAD</span></div>
+                                    <div class="preset-snippet" id="bound5000">LONG_TEXT_PAYLOAD_5000_BYTES_TESTING_DATA_...</div>
+                                </div>
+                                <div class="preset-actions">
+                                    <button class="btn-sm btn-sec-sm" onclick="copyPresetVal('bound5000')"><i data-lucide="copy" size="14"></i> Copy</button>
+                                </div>
+                            </div>
+                            <div class="preset-item" style="background:rgba(255,255,255,0.02);">
+                                <div class="preset-info" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                    <span style="font-size:0.8rem; font-weight:600;">Custom N Karakter:</span>
+                                    <input type="number" id="customLenInput" value="512" min="1" max="50000" style="width:90px; background:#0d1117; color:white; border:1px solid var(--border); padding:5px; border-radius:4px;">
+                                    <button class="btn-sm btn-primary-sm" onclick="generateCustomLengthString()"><i data-lucide="sparkles" size="12"></i> Generate & Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Unicode & Extreme -->
+                    <div id="presetTab-unicode" class="preset-content" style="display:none;">
+                        <div class="preset-card-list">
+                            <div class="preset-item">
+                                <div class="preset-info">
+                                    <div class="preset-title"><span>Zalgo Text (Glitch & Extreme Diacritics)</span></div>
+                                    <div class="preset-snippet" id="zalgoPreset">Z͑ͫ̓ͪ̂ͫ̽͏͈̙̜͉̞͉A̭̖͍͕͇̰ͫͪ̽ͧͯ̿͜͝Lͨͧͪ͐̽ͽ͏̟͓Gͩͩ́̂O_T̼ͥ̎̿ͯ͒͝EͬͦͩSͪT</div>
+                                </div>
+                                <div class="preset-actions">
+                                    <button class="btn-sm btn-sec-sm" onclick="copyPresetVal('zalgoPreset')"><i data-lucide="copy" size="14"></i> Copy</button>
+                                </div>
+                            </div>
+                            <div class="preset-item">
+                                <div class="preset-info">
+                                    <div class="preset-title"><span>Zero-Width Space & Joiner Sequences</span> <span class="badge badge-neutral">U+200B, U+200C, U+200D, U+FEFF</span></div>
+                                    <div class="preset-snippet" id="zwPreset">Hidden&#8203;Zero&#8204;Width&#8205;Chars&#65279;Test</div>
+                                </div>
+                                <div class="preset-actions">
+                                    <button class="btn-sm btn-sec-sm" onclick="copyPresetVal('zwPreset')"><i data-lucide="copy" size="14"></i> Copy</button>
+                                </div>
+                            </div>
+                            <div class="preset-item">
+                                <div class="preset-info">
+                                    <div class="preset-title"><span>Multi-byte CJK, Arabic, Cyrillic & Thai</span></div>
+                                    <div class="preset-snippet" id="multibytePreset">测试_اختبار_тест_ทดสอบ_한국어_🚀</div>
+                                </div>
+                                <div class="preset-actions">
+                                    <button class="btn-sm btn-sec-sm" onclick="copyPresetVal('multibytePreset')"><i data-lucide="copy" size="14"></i> Copy</button>
+                                </div>
+                            </div>
+                            <div class="preset-item">
+                                <div class="preset-info">
+                                    <div class="preset-title"><span>Complex Emojis & Modifiers (ZWJ Family, Flags)</span></div>
+                                    <div class="preset-snippet" id="emojiPreset">👨‍👩‍👧‍👦 🏳️‍🌈 🧑🏽‍💻 🏴‍☠️ 🦾 🫱🏻‍🫲🏿</div>
+                                </div>
+                                <div class="preset-actions">
+                                    <button class="btn-sm btn-sec-sm" onclick="copyPresetVal('emojiPreset')"><i data-lucide="copy" size="14"></i> Copy</button>
+                                </div>
+                            </div>
+                            <div class="preset-item">
+                                <div class="preset-info">
+                                    <div class="preset-title"><span>RTL (Right-To-Left) Text Injection</span></div>
+                                    <div class="preset-snippet" id="rtlPreset">&#x202E;This_text_is_reversed_by_RTL_override&#x202C;</div>
+                                </div>
+                                <div class="preset-actions">
+                                    <button class="btn-sm btn-sec-sm" onclick="copyPresetVal('rtlPreset')"><i data-lucide="copy" size="14"></i> Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Security Payloads -->
+                    <div id="presetTab-security" class="preset-content" style="display:none;">
+                        <div class="preset-card-list">
+                            <div class="preset-item">
+                                <div class="preset-info">
+                                    <div class="preset-title"><span>XSS Basic Script Tag</span> <span class="badge badge-danger">XSS</span></div>
+                                    <div class="preset-snippet" id="xss1">&lt;script&gt;alert('XSS_TEST')&lt;/script&gt;</div>
+                                </div>
+                                <div class="preset-actions">
+                                    <button class="btn-sm btn-sec-sm" onclick="copyPresetVal('xss1')"><i data-lucide="copy" size="14"></i> Copy</button>
+                                </div>
+                            </div>
+                            <div class="preset-item">
+                                <div class="preset-info">
+                                    <div class="preset-title"><span>XSS Image OnError Payload</span> <span class="badge badge-danger">XSS</span></div>
+                                    <div class="preset-snippet" id="xss2">"&gt;&lt;img src=x onerror=alert('XSS')&gt;</div>
+                                </div>
+                                <div class="preset-actions">
+                                    <button class="btn-sm btn-sec-sm" onclick="copyPresetVal('xss2')"><i data-lucide="copy" size="14"></i> Copy</button>
+                                </div>
+                            </div>
+                            <div class="preset-item">
+                                <div class="preset-info">
+                                    <div class="preset-title"><span>SQL Injection Authentication Bypass</span> <span class="badge badge-danger">SQLi</span></div>
+                                    <div class="preset-snippet" id="sqli1">' OR '1'='1' -- </div>
+                                </div>
+                                <div class="preset-actions">
+                                    <button class="btn-sm btn-sec-sm" onclick="copyPresetVal('sqli1')"><i data-lucide="copy" size="14"></i> Copy</button>
+                                </div>
+                            </div>
+                            <div class="preset-item">
+                                <div class="preset-info">
+                                    <div class="preset-title"><span>SQL Injection Union Based Probe</span> <span class="badge badge-danger">SQLi</span></div>
+                                    <div class="preset-snippet" id="sqli2">' UNION SELECT 1, 'admin', null, version() -- </div>
+                                </div>
+                                <div class="preset-actions">
+                                    <button class="btn-sm btn-sec-sm" onclick="copyPresetVal('sqli2')"><i data-lucide="copy" size="14"></i> Copy</button>
+                                </div>
+                            </div>
+                            <div class="preset-item">
+                                <div class="preset-info">
+                                    <div class="preset-title"><span>Path Traversal (Linux & Windows)</span> <span class="badge badge-danger">TRAVERSAL</span></div>
+                                    <div class="preset-snippet" id="traverse1">../../../../etc/passwd</div>
+                                </div>
+                                <div class="preset-actions">
+                                    <button class="btn-sm btn-sec-sm" onclick="copyPresetVal('traverse1')"><i data-lucide="copy" size="14"></i> Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
         </div>
@@ -242,10 +534,11 @@
                             <button class="btn-primary" onclick="generatePasswordHash()">Hash Password</button>
                         </div>
                         <div class="hash-card" style="margin-top: 10px;">
-                            <span class="hash-label">Bcrypt Hash (Cost: 10)</span>
+                            <div class="hash-header">
+                                <span class="hash-label">Bcrypt Hash (Cost: 10)</span>
+                                <button class="copy-icon-btn" onclick="copyDirect('bcryptResult')"><i data-lucide="copy" size="14"></i></button>
+                            </div>
                             <div id="bcryptResult" class="hash-val" style="color: var(--j-string)">-</div>
-                            <button class="copy-icon-btn" onclick="copyDirect('bcryptResult')"><i data-lucide="copy" size="14"></i></button>
-                            <div id="bcryptResult" class="hash-val">-</div>
                         </div>
                     </div>
                 </div>
